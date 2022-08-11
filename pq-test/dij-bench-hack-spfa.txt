@@ -1,0 +1,53 @@
+2022-08-08T11:21:49-00:00
+Running D:\Projects\pbds_benchmark\pq-test\dij-bench-hack-spfa.exe
+Run on (8 X 1811.57 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x4)
+  L1 Instruction 32 KiB (x4)
+  L2 Unified 256 KiB (x4)
+  L3 Unified 6144 KiB (x1)
+-------------------------------------------------------------------------------------
+Benchmark                                           Time             CPU   Iterations
+-------------------------------------------------------------------------------------
+bench_dijkstra_stl/10/200000                     1181 ns         1151 ns       746667
+bench_dijkstra_stl/160/200000                    9277 ns         9417 ns        74667
+bench_dijkstra_stl/2560/200000                 114803 ns       116839 ns         8960
+bench_dijkstra_stl/40960/200000               1887062 ns      2102159 ns          498
+bench_dijkstra_stl/81920/200000               4715431 ns      5312500 ns          100
+bench_dijkstra_stl_BigO                          3.43 NlgN       3.86 NlgN
+bench_dijkstra_stl_RMS                             10 %            11 %
+bench_dijkstra_pbds/10/200000                    2082 ns         1660 ns       320000
+bench_dijkstra_pbds/160/200000                  26832 ns        26088 ns        26353
+bench_dijkstra_pbds/2560/200000                425102 ns       380876 ns         1723
+bench_dijkstra_pbds/40960/200000              8759234 ns      8463542 ns           96
+bench_dijkstra_pbds/81920/200000             19539616 ns     16047297 ns           37
+bench_dijkstra_pbds_BigO                        14.50 NlgN      12.27 NlgN
+bench_dijkstra_pbds_RMS                             3 %             8 %
+bench_dijkstra_pbds_thin_heap/10/200000          2375 ns         2197 ns       320000
+bench_dijkstra_pbds_thin_heap/160/200000        46636 ns        45898 ns        16000
+bench_dijkstra_pbds_thin_heap/2560/200000      754225 ns       953125 ns         1000
+bench_dijkstra_pbds_thin_heap/40960/200000   17027206 ns     16250000 ns           50
+bench_dijkstra_pbds_thin_heap/81920/200000   31281644 ns     30000000 ns           25
+bench_dijkstra_pbds_thin_heap_BigO              24.07 NlgN      23.06 NlgN
+bench_dijkstra_pbds_thin_heap_RMS                  10 %             9 %
+bench_dijkstra_heap/10/200000                    1180 ns         1489 ns       640000
+bench_dijkstra_heap/160/200000                  10162 ns        10045 ns        49778
+bench_dijkstra_heap/2560/200000                171737 ns       214471 ns         2987
+bench_dijkstra_heap/40960/200000              3819276 ns      4267068 ns          249
+bench_dijkstra_heap/81920/200000              9989859 ns      9375000 ns           75
+bench_dijkstra_heap_BigO                         7.22 NlgN       6.97 NlgN
+bench_dijkstra_heap_RMS                            13 %             2 %
+bench_dijkstra_segt/10/200000                    1693 ns         1842 ns       373333
+bench_dijkstra_segt/160/200000                  39552 ns        34494 ns        19478
+bench_dijkstra_segt/2560/200000                632179 ns       558036 ns          896
+bench_dijkstra_segt/40960/200000             12863900 ns     12187500 ns           50
+bench_dijkstra_segt/81920/200000             28894580 ns     28750000 ns           25
+bench_dijkstra_segt_BigO                        21.41 NlgN      21.13 NlgN
+bench_dijkstra_segt_RMS                             3 %             6 %
+bench_spfa_stl/10/200000                         1048 ns          859 ns      1000000
+bench_spfa_stl/160/200000                        4808 ns         3868 ns       145438
+bench_spfa_stl/2560/200000                     149282 ns       148516 ns         5576
+bench_spfa_stl/40960/200000                  29961758 ns     30427632 ns           19
+bench_spfa_stl/81920/200000                 113029043 ns    111607143 ns            7
+bench_spfa_stl_BigO                             77.86 NlgN      77.13 NlgN
+bench_spfa_stl_RMS                                 33 %            31 %

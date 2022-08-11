@@ -1,0 +1,13 @@
+CompileFlags:
+  Add:
+    [
+      "-IC:/msys64/mingw64/include/c++/12.1.0",
+      "-IC:/msys64/mingw64/include/c++/12.1.0/x86_64-w64-mingw32",
+      "-IC:/msys64/mingw64/include/c++/12.1.0/backward",
+      "-IC:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/12.1.0/include",
+      "-IC:/msys64/mingw64/include",
+      "-IC:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/12.1.0/include-fixed",
+      "-Wall",
+      "-Wextra",
+    ]
+  Compiler: gcc
