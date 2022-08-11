@@ -1,0 +1,241 @@
+2022-08-08T14:33:33-00:00
+Running D:\Projects\pbds_benchmark\pq-test\dij-bench.exe
+Run on (8 X 1809.52 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x4)
+  L1 Instruction 32 KiB (x4)
+  L2 Unified 256 KiB (x4)
+  L3 Unified 6144 KiB (x1)
+WITHOUT O2
+--------------------------------------------------------------------------------------
+Benchmark                                            Time             CPU   Iterations
+--------------------------------------------------------------------------------------
+bench_dijkstra_stl/10/200000                      4440 ns         4349 ns       154483
+bench_dijkstra_stl/160/200000                    71611 ns        64772 ns        12544
+bench_dijkstra_stl/2560/200000                 1025964 ns      1123047 ns          640
+bench_dijkstra_stl/40960/200000               16889983 ns     16387195 ns           41
+bench_dijkstra_stl/81920/200000               34146500 ns     32031250 ns           20
+bench_dijkstra_stl/92160/200000               38197850 ns     37500000 ns           20
+bench_dijkstra_stl/102400/200000              42424674 ns     40296053 ns           19
+bench_dijkstra_stl/112640/200000              52459443 ns     52455357 ns           14
+bench_dijkstra_stl/122880/200000              51459500 ns     51562500 ns           10
+bench_dijkstra_stl/133120/200000              56395155 ns     52556818 ns           11
+bench_dijkstra_stl/143360/200000              61171991 ns     63920455 ns           11
+bench_dijkstra_stl/153600/200000              63038789 ns     64236111 ns            9
+bench_dijkstra_stl/163840/200000              67547027 ns     66761364 ns           11
+bench_dijkstra_stl/174080/200000              72785809 ns     73863636 ns           11
+bench_dijkstra_stl/184320/200000              76746867 ns     74652778 ns            9
+bench_dijkstra_stl/194560/200000              80458011 ns     83333333 ns            9
+bench_dijkstra_stl_BigO                          24.35 NlgN      24.32 NlgN 
+bench_dijkstra_stl_RMS                               5 %             5 %    
+bench_dijkstra_pbds/10/200000                     4579 ns         4813 ns       194783
+bench_dijkstra_pbds/160/200000                   88310 ns        71115 ns         7690
+bench_dijkstra_pbds/2560/200000                1149801 ns      1382373 ns          373
+bench_dijkstra_pbds/40960/200000              17461219 ns     16469595 ns           37
+bench_dijkstra_pbds/81920/200000              37079839 ns     35590278 ns           18
+bench_dijkstra_pbds/92160/200000              40667450 ns     41015625 ns           16
+bench_dijkstra_pbds/102400/200000             47587633 ns     48958333 ns           15
+bench_dijkstra_pbds/112640/200000             51494130 ns     53125000 ns           10
+bench_dijkstra_pbds/122880/200000             56127700 ns     58238636 ns           11
+bench_dijkstra_pbds/133120/200000             61092436 ns     62500000 ns           11
+bench_dijkstra_pbds/143360/200000             69031191 ns     69602273 ns           11
+bench_dijkstra_pbds/153600/200000             78698370 ns     81250000 ns           10
+bench_dijkstra_pbds/163840/200000             75900800 ns     75892857 ns            7
+bench_dijkstra_pbds/174080/200000             81687100 ns     80357143 ns            7
+bench_dijkstra_pbds/184320/200000             88673456 ns     92013889 ns            9
+bench_dijkstra_pbds/194560/200000             93813629 ns     93750000 ns            7
+bench_dijkstra_pbds_BigO                         27.53 NlgN      27.88 NlgN 
+bench_dijkstra_pbds_RMS                              4 %             5 %    
+bench_dijkstra_pbds_thin_heap/10/200000           6391 ns         7499 ns        89600
+bench_dijkstra_pbds_thin_heap/160/200000        117226 ns       108817 ns        11200
+bench_dijkstra_pbds_thin_heap/2560/200000      2214025 ns      2287531 ns          806
+bench_dijkstra_pbds_thin_heap/40960/200000    39480113 ns     40039062 ns           16
+bench_dijkstra_pbds_thin_heap/81920/200000    95593509 ns     95170455 ns           11
+bench_dijkstra_pbds_thin_heap/92160/200000    90372800 ns     91517857 ns            7
+bench_dijkstra_pbds_thin_heap/102400/200000   98591629 ns     98214286 ns            7
+bench_dijkstra_pbds_thin_heap/112640/200000  108368700 ns    109375000 ns            6
+bench_dijkstra_pbds_thin_heap/122880/200000  119903883 ns    119791667 ns            6
+bench_dijkstra_pbds_thin_heap/133120/200000  129996020 ns    125000000 ns            5
+bench_dijkstra_pbds_thin_heap/143360/200000  145324125 ns    148437500 ns            4
+bench_dijkstra_pbds_thin_heap/153600/200000  154476825 ns    156250000 ns            4
+bench_dijkstra_pbds_thin_heap/163840/200000  163320400 ns    164062500 ns            4
+bench_dijkstra_pbds_thin_heap/174080/200000  169312933 ns    166666667 ns            3
+bench_dijkstra_pbds_thin_heap/184320/200000  186655525 ns    187500000 ns            4
+bench_dijkstra_pbds_thin_heap/194560/200000  195029900 ns    192708333 ns            3
+bench_dijkstra_pbds_thin_heap_BigO               57.95 NlgN      57.85 NlgN 
+bench_dijkstra_pbds_thin_heap_RMS                    5 %             5 %    
+bench_dijkstra_heap/10/200000                     2396 ns         2609 ns       263529
+bench_dijkstra_heap/160/200000                   36221 ns        34841 ns        16593
+bench_dijkstra_heap/2560/200000                 722120 ns       798767 ns         1115
+bench_dijkstra_heap/40960/200000              15286598 ns     16319444 ns           45
+bench_dijkstra_heap/81920/200000              34377665 ns     33088235 ns           17
+bench_dijkstra_heap/92160/200000              39745550 ns     40798611 ns           18
+bench_dijkstra_heap/102400/200000             43480221 ns     42410714 ns           14
+bench_dijkstra_heap/112640/200000             53732967 ns     53125000 ns           15
+bench_dijkstra_heap/122880/200000             52965080 ns     54687500 ns           10
+bench_dijkstra_heap/133120/200000             58982000 ns     61079545 ns           11
+bench_dijkstra_heap/143360/200000             64573867 ns     64236111 ns            9
+bench_dijkstra_heap/153600/200000             79992327 ns     78125000 ns           11
+bench_dijkstra_heap/163840/200000             74838144 ns     69444444 ns            9
+bench_dijkstra_heap/174080/200000             77605171 ns     75892857 ns            7
+bench_dijkstra_heap/184320/200000             88337100 ns     86805556 ns            9
+bench_dijkstra_heap/194560/200000             91016522 ns     90277778 ns            9
+bench_dijkstra_heap_BigO                         26.78 NlgN      26.40 NlgN 
+bench_dijkstra_heap_RMS                              6 %             6 %    
+bench_dijkstra_segt/10/200000                     2897 ns         2431 ns       263529
+bench_dijkstra_segt/160/200000                   55143 ns        64062 ns        10000
+bench_dijkstra_segt/2560/200000                1038124 ns      1196289 ns          640
+bench_dijkstra_segt/40960/200000              20456876 ns     21537162 ns           37
+bench_dijkstra_segt/81920/200000              43397350 ns     43526786 ns           14
+bench_dijkstra_segt/92160/200000              52520045 ns     58238636 ns           11
+bench_dijkstra_segt/102400/200000             53725582 ns     53977273 ns           11
+bench_dijkstra_segt/112640/200000             60867380 ns     64062500 ns           10
+bench_dijkstra_segt/122880/200000             65829982 ns     65340909 ns           11
+bench_dijkstra_segt/133120/200000             73352991 ns     73863636 ns           11
+bench_dijkstra_segt/143360/200000             77443456 ns     78125000 ns            9
+bench_dijkstra_segt/153600/200000             85523386 ns     84821429 ns            7
+bench_dijkstra_segt/163840/200000             87891643 ns     91517857 ns            7
+bench_dijkstra_segt/174080/200000             93306950 ns     91145833 ns            6
+bench_dijkstra_segt/184320/200000            100996600 ns    100446429 ns            7
+bench_dijkstra_segt/194560/200000            125577814 ns    129464286 ns            7
+bench_dijkstra_segt_BigO                         32.48 NlgN      32.91 NlgN 
+bench_dijkstra_segt_RMS                              7 %             9 %    
+bench_spfa_stl/10/200000                          2116 ns         2583 ns       350882
+bench_spfa_stl/160/200000                        20304 ns        19461 ns        49778
+bench_spfa_stl/2560/200000                      825570 ns       732422 ns          896
+bench_spfa_stl/40960/200000                  136033975 ns    132812500 ns            4
+bench_spfa_stl/81920/200000                  742679200 ns    734375000 ns            1
+bench_spfa_stl/92160/200000                  518090200 ns    515625000 ns            1
+bench_spfa_stl/102400/200000                 884009900 ns    875000000 ns            1
+bench_spfa_stl/112640/200000                1788572300 ns   1796875000 ns            1
+bench_spfa_stl/122880/200000                 691330700 ns    687500000 ns            1
+bench_spfa_stl/133120/200000                1981740100 ns   1984375000 ns            1
+bench_spfa_stl/143360/200000                3908900700 ns   3890625000 ns            1
+bench_spfa_stl/153600/200000                2053843100 ns   2046875000 ns            1
+bench_spfa_stl/163840/200000                1810738100 ns   1812500000 ns            1
+bench_spfa_stl/174080/200000                1780073300 ns   1781250000 ns            1
+bench_spfa_stl/184320/200000                2661009500 ns   2656250000 ns            1
+bench_spfa_stl/194560/200000                1978108400 ns   1968750000 ns            1
+bench_spfa_stl_BigO                             736.38 NlgN     734.72 NlgN 
+bench_spfa_stl_RMS                                  49 %            49 %    
+=========================================================
+2022-08-08T14:42:49-00:00
+Running D:\Projects\pbds_benchmark\pq-test\dij-bench.exe
+Run on (8 X 1803.9 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x4)
+  L1 Instruction 32 KiB (x4)
+  L2 Unified 256 KiB (x4)
+  L3 Unified 6144 KiB (x1)
+WITHOUT O2
+--------------------------------------------------------------------------------------
+Benchmark                                            Time             CPU   Iterations
+--------------------------------------------------------------------------------------
+bench_dijkstra_stl/10/200000                      1201 ns          952 ns       640000
+bench_dijkstra_stl/160/200000                     8703 ns         8789 ns        64000
+bench_dijkstra_stl/2560/200000                  115865 ns       109863 ns         6400
+bench_dijkstra_stl/40960/200000                1863107 ns      1953125 ns          560
+bench_dijkstra_stl/81920/200000                4509271 ns      5022321 ns          112
+bench_dijkstra_stl/92160/200000                5271335 ns      5580357 ns          112
+bench_dijkstra_stl/102400/200000               5760120 ns      5161830 ns          112
+bench_dijkstra_stl/112640/200000               6753025 ns      6562500 ns          100
+bench_dijkstra_stl/122880/200000               7101833 ns      9791667 ns           75
+bench_dijkstra_stl/133120/200000               7643631 ns      7291667 ns           90
+bench_dijkstra_stl/143360/200000               8383963 ns      6875000 ns          100
+bench_dijkstra_stl/153600/200000               9022893 ns      8125000 ns           75
+bench_dijkstra_stl/163840/200000              11650800 ns     12974330 ns          112
+bench_dijkstra_stl/174080/200000              12689355 ns     10881696 ns           56
+bench_dijkstra_stl/184320/200000              14180750 ns     12500000 ns           50
+bench_dijkstra_stl/194560/200000              14440269 ns     14583333 ns           45
+bench_dijkstra_stl_BigO                           3.86 NlgN       3.75 NlgN 
+bench_dijkstra_stl_RMS                              13 %            19 %    
+bench_dijkstra_pbds/10/200000                     2795 ns         2490 ns       263529
+bench_dijkstra_pbds/160/200000                   57415 ns        65569 ns        11200
+bench_dijkstra_pbds/2560/200000                 656971 ns       732422 ns          896
+bench_dijkstra_pbds/40960/200000              11938463 ns     10602679 ns          112
+bench_dijkstra_pbds/81920/200000              25932572 ns     25000000 ns           25
+bench_dijkstra_pbds/92160/200000              21752136 ns     20089286 ns           28
+bench_dijkstra_pbds/102400/200000             24280473 ns     22916667 ns           30
+bench_dijkstra_pbds/112640/200000             25836973 ns     25841346 ns           26
+bench_dijkstra_pbds/122880/200000             29424772 ns     28125000 ns           25
+bench_dijkstra_pbds/133120/200000             31062195 ns     31994048 ns           21
+bench_dijkstra_pbds/143360/200000             34988600 ns     33593750 ns           20
+bench_dijkstra_pbds/153600/200000             37456332 ns     36184211 ns           19
+bench_dijkstra_pbds/163840/200000             42338341 ns     42279412 ns           17
+bench_dijkstra_pbds/174080/200000             44285031 ns     43945312 ns           16
+bench_dijkstra_pbds/184320/200000             46484300 ns     45898438 ns           16
+bench_dijkstra_pbds/194560/200000             50497709 ns     51136364 ns           11
+bench_dijkstra_pbds_BigO                         14.55 NlgN      14.34 NlgN 
+bench_dijkstra_pbds_RMS                              7 %             7 %    
+bench_dijkstra_pbds_thin_heap/10/200000           2357 ns         2176 ns       495566
+bench_dijkstra_pbds_thin_heap/160/200000         45966 ns        50781 ns        16000
+bench_dijkstra_pbds_thin_heap/2560/200000       835766 ns       613839 ns         1120
+bench_dijkstra_pbds_thin_heap/40960/200000    14719221 ns     15066964 ns           56
+bench_dijkstra_pbds_thin_heap/81920/200000    29723254 ns     29947917 ns           24
+bench_dijkstra_pbds_thin_heap/92160/200000    34964820 ns     35937500 ns           20
+bench_dijkstra_pbds_thin_heap/102400/200000   38778126 ns     37828947 ns           19
+bench_dijkstra_pbds_thin_heap/112640/200000   43484871 ns     44117647 ns           17
+bench_dijkstra_pbds_thin_heap/122880/200000   44676013 ns     44791667 ns           15
+bench_dijkstra_pbds_thin_heap/133120/200000   49238482 ns     49715909 ns           11
+bench_dijkstra_pbds_thin_heap/143360/200000   52303109 ns     52556818 ns           11
+bench_dijkstra_pbds_thin_heap/153600/200000   57549482 ns     58238636 ns           11
+bench_dijkstra_pbds_thin_heap/163840/200000   62673711 ns     64236111 ns            9
+bench_dijkstra_pbds_thin_heap/174080/200000   69940518 ns     69602273 ns           11
+bench_dijkstra_pbds_thin_heap/184320/200000   70928818 ns     68181818 ns           11
+bench_dijkstra_pbds_thin_heap/194560/200000   85655133 ns     85069444 ns            9
+bench_dijkstra_pbds_thin_heap_BigO               22.63 NlgN      22.60 NlgN 
+bench_dijkstra_pbds_thin_heap_RMS                    6 %             6 %    
+bench_dijkstra_heap/10/200000                     1196 ns         1193 ns       746667
+bench_dijkstra_heap/160/200000                   10143 ns         9208 ns       112000
+bench_dijkstra_heap/2560/200000                 170590 ns       168795 ns         4073
+bench_dijkstra_heap/40960/200000               3704831 ns      3765060 ns          166
+bench_dijkstra_heap/81920/200000               9593930 ns     10253906 ns           64
+bench_dijkstra_heap/92160/200000              11174277 ns     11718750 ns           56
+bench_dijkstra_heap/102400/200000             12421811 ns     11718750 ns           64
+bench_dijkstra_heap/112640/200000             14185280 ns     15277778 ns           45
+bench_dijkstra_heap/122880/200000             15648889 ns     15625000 ns           45
+bench_dijkstra_heap/133120/200000             17066943 ns     16047297 ns           37
+bench_dijkstra_heap/143360/200000             18567512 ns     17149390 ns           41
+bench_dijkstra_heap/153600/200000             19996638 ns     19425676 ns           37
+bench_dijkstra_heap/163840/200000             21608527 ns     22395833 ns           30
+bench_dijkstra_heap/174080/200000             22735832 ns     21599265 ns           34
+bench_dijkstra_heap/184320/200000             24669115 ns     25240385 ns           26
+bench_dijkstra_heap/194560/200000             26229396 ns     24639423 ns           26
+bench_dijkstra_heap_BigO                          7.55 NlgN       7.42 NlgN 
+bench_dijkstra_heap_RMS                              3 %             6 %    
+bench_dijkstra_segt/10/200000                     1691 ns         1168 ns       896000
+bench_dijkstra_segt/160/200000                   33284 ns        32087 ns        19478
+bench_dijkstra_segt/2560/200000                 618094 ns       662667 ns          896
+bench_dijkstra_segt/40960/200000              12417314 ns     12555804 ns           56
+bench_dijkstra_segt/81920/200000              27261689 ns     27343750 ns           28
+bench_dijkstra_segt/92160/200000              30881096 ns     29947917 ns           24
+bench_dijkstra_segt/102400/200000             34252333 ns     34722222 ns           18
+bench_dijkstra_segt/112640/200000             39228650 ns     39062500 ns           18
+bench_dijkstra_segt/122880/200000             40277676 ns     39522059 ns           17
+bench_dijkstra_segt/133120/200000             46315113 ns     45898438 ns           16
+bench_dijkstra_segt/143360/200000             50783573 ns     51136364 ns           11
+bench_dijkstra_segt/153600/200000             53966150 ns     54687500 ns           10
+bench_dijkstra_segt/163840/200000             58104790 ns     57812500 ns           10
+bench_dijkstra_segt/174080/200000             61742755 ns     59659091 ns           11
+bench_dijkstra_segt/184320/200000             76884573 ns     80965909 ns           11
+bench_dijkstra_segt/194560/200000             67906218 ns     65340909 ns           11
+bench_dijkstra_segt_BigO                         20.78 NlgN      20.73 NlgN 
+bench_dijkstra_segt_RMS                              7 %            11 %    
+bench_spfa_stl/10/200000                          1059 ns         1004 ns       746667
+bench_spfa_stl/160/200000                         4788 ns         5312 ns       100000
+bench_spfa_stl/2560/200000                      152988 ns       167411 ns         4480
+bench_spfa_stl/40960/200000                   25160084 ns     24375000 ns           25
+bench_spfa_stl/81920/200000                  134011600 ns    133928571 ns            7
+bench_spfa_stl/92160/200000                  131306300 ns    129464286 ns            7
+bench_spfa_stl/102400/200000                 166435483 ns    161458333 ns            6
+bench_spfa_stl/112640/200000                 260090350 ns    257812500 ns            4
+bench_spfa_stl/122880/200000                 220942467 ns    223958333 ns            3
+bench_spfa_stl/133120/200000                 251530667 ns    255208333 ns            3
+bench_spfa_stl/143360/200000                 275051300 ns    273437500 ns            2
+bench_spfa_stl/153600/200000                 422498950 ns    429687500 ns            2
+bench_spfa_stl/163840/200000                 741884100 ns    734375000 ns            1
+bench_spfa_stl/174080/200000                 736566100 ns    734375000 ns            1
+bench_spfa_stl/184320/200000                 514786800 ns    515625000 ns            1
+bench_spfa_stl/194560/200000                 790942800 ns    718750000 ns            1
+bench_spfa_stl_BigO                             174.42 NlgN     170.87 NlgN 
+bench_spfa_stl_RMS                                  44 %            43 %    

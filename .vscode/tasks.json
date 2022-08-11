@@ -1,0 +1,30 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Windows build",
+            "command": "gcc.exe",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-O2",
+                "-std=c++20",
+                "-Wall",
+                "-Wextra",
+                "-DDEBUG",
+                "-DVSCODE",
+                "-fno-ms-extensions",
+                "-lstdc++",
+                "-lm",
+                "-pthread",
+                "-lbenchmark"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            }
+        },
+    ],
+    "version": "2.0.0"
+}
