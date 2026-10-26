@@ -43,5 +43,30 @@ endfunction()
 
 enable_testing()
 
-add_subdirectory(hash-test)
-add_subdirectory(pq-test)
+# ---------------------------------------------------------------------------
+# 编译器检测：hash-test / pq-test 依赖 GCC 的 <ext/pb_ds>，非 GCC 编译器自动跳过
+# ---------------------------------------------------------------------------
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(_pbds_benchmarks_default ON)
+else()
+  set(_pbds_benchmarks_default OFF)
+endif()
+
+option(PBDS_BENCHMARKS
+  "Build benchmarks that depend on GCC's <ext/pb_ds> (hash-test, pq-test)"
+  ${_pbds_benchmarks_default})
+
+if(PBDS_BENCHMARKS)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(WARNING
+      "PBDS_BENCHMARKS=ON but the compiler is ${CMAKE_CXX_COMPILER_ID} (not GCC); "
+      "<ext/pb_ds> benchmarks are unlikely to compile")
+  endif()
+  message(STATUS "Building pbds-based benchmarks (hash-test, pq-test) with ${CMAKE_CXX_COMPILER_ID}")
+  add_subdirectory(hash-test)
+  add_subdirectory(pq-test)
+else()
+  message(STATUS
+    "Compiler is ${CMAKE_CXX_COMPILER_ID} (not GCC): skipping pbds-based benchmarks "
+    "(hash-test, pq-test). Pass -DPBDS_BENCHMARKS=ON to force.")
+endif()
