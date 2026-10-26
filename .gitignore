@@ -5,3 +5,6 @@
 build/
 CMakeCache.txt
 CMakeFiles/
+
+# clangd index cache
+.cache/
