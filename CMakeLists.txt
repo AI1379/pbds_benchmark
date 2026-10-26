@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 project(pbds_benchmark LANGUAGES CXX)
 
+# 生成 compile_commands.json 供 clangd / IDE 使用（单配置生成器有效）
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # 本仓库源码使用的标准（与 .vscode/tasks.json 的 -std=c++20 一致）
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
