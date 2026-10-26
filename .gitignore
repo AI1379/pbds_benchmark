@@ -1,2 +1,7 @@
 */*.exe
 */*.o
+
+# CMake build output
+build/
+CMakeCache.txt
+CMakeFiles/
