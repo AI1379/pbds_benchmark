@@ -24,7 +24,7 @@
   nsp::dijkstra();        \
   OUTPUT_DIJKSTRA(nsp)
 
-static void dijkstraArguments(benchmark::internal::Benchmark* b) {
+static void dijkstraArguments(benchmark::Benchmark* b) {
   for (ll i = 10; i < 200000;) {
     b->Args({i, 200000});
     if (i <= 10000) {
