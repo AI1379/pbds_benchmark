@@ -8,3 +8,8 @@ CMakeFiles/
 
 # clangd index cache
 .cache/
+
+# Downloaded benchmark data (official DIMACS 9th-challenge USA road networks).
+# Restore it reproducibly with: pwsh pq-test/tools/fetch-dimacs.ps1
+# See docs/DATA.md for provenance, hashes and verification instructions.
+data/
