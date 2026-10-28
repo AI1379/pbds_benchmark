@@ -1,25 +1,21 @@
-\title{不同优先队列下 Dijkstra 算法的实现与评测}
-\author{\ifAnonymous 匿名报告底稿\else\ReportAuthors\fi}
+\title{Implementation and Evaluation of Dijkstra's Algorithm with Different Priority Queues}
+\author{}
 \date{\ReportDate}
 \maketitle
 \begin{abstract}
-本项目在统一的 CSR 图表示与优先队列接口下，实现并比较七种 Dijkstra 队列策略，
-包括必须考察的 Fibonacci 堆；另外加入 FIFO SPFA 和 SLF+LLL SPFA 作为参照。
-实验覆盖随机图的 171 组配置、固定密度复杂度实验的 126 组配置，
-以及 NY、BAY 两个 DIMACS 路网各 1000 条查询、每图九种实现。
-本次 WSL2 Release 测量中，路网上最好的 Dijkstra 队列为 radix heap，
-NY、BAY 的平均墙钟时间分别为 12.621 和 13.873 ms/查询；
-SLF+LLL SPFA 分别为 7.267 和 9.258 ms/查询。
-Fibonacci 堆没有在这两张路网上显示实际速度优势。
-本文同时区分渐近保证、有限规模拟合与实际运行时间，讨论整数键范围、
-输入可达性及重复次数对结论的限制。
+This project compares seven priority-queue strategies for Dijkstra's algorithm
+within a shared CSR graph representation and queue interface. The comparison
+includes a Fibonacci heap and also considers FIFO SPFA and SLF+LLL SPFA, although
+neither SPFA variant is a heap-based form of Dijkstra's algorithm. The experiments
+cover 171 random-graph configurations, 126 fixed-density configurations, and
+1,000 queries on each of the NY and BAY DIMACS road networks for nine
+implementations. In the WSL2 Release measurements, the radix heap was the fastest
+Dijkstra queue on both road networks, with mean wall-clock times of 12.621 and
+13.873 ms/query for NY and BAY, respectively. SLF+LLL SPFA required 7.267 and
+9.258 ms/query. The Fibonacci heap showed no practical speed advantage on either
+network. The report distinguishes asymptotic guarantees, finite-size model fits,
+and measured runtimes, and it states the applicable range of the observed results.
 \end{abstract}
-\noindent\textbf{关键词：}Dijkstra；Fibonacci 堆；radix heap；DIMACS；复杂度分析
+\noindent\textbf{Keywords:} Dijkstra's algorithm; Fibonacci heap; radix heap; DIMACS; complexity analysis
 
-\ifDraftNotes
-\bigskip
-\noindent\textbf{底稿说明。}正文及图表已填入本次实测数据，数字表由脚本生成。
-作者分工、声明签名和源码注释比例仍需项目成员核对。
-默认匿名开关开启；正式提交前请按当前课程通知确认匿名与命名要求。
-\fi
 \clearpage

@@ -15,3 +15,13 @@ CMakeFiles/
 # Anchored to the project root: reports/data/ holds committed CSV snapshots
 # that the report is built from and must not be ignored.
 /data/
+
+reports/data/macos-2026-10-28/
+
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+.DS_Store

@@ -1,71 +1,105 @@
-\section{分析与讨论}
+\section{Analysis and Comments}
 \label{sec:analysis}
-\subsection{时间与空间复杂度}
-表\ref{tab:bounds} 讨论从给定源点进行一次完整搜索。
-图本身占 $O(n+m)$ 空间，距离数组占 $O(n)$；表中的队列空间单列。
-标准库版本使用懒删除，其堆中可能保留 $O(m)$ 个条目，
-与每个顶点仅一个在堆条目的减键实现存在实质差别。
+\subsection{Time and Space Complexity}
+Table~\ref{tab:bounds} considers one complete search from a given source. The graph
+itself uses $O(n+m)$ space and the distance array uses $O(n)$; queue space is listed
+separately. The standard-library version uses lazy deletion and may retain $O(m)$
+entries, which differs substantially from implementations that keep only one heap
+entry per vertex.
 
 \begin{table}[H]\centering\small
-\caption{队列策略的代价与适用条件}\label{tab:bounds}
-\begin{tabularx}{\linewidth}{lXXl}\toprule
-策略 & 时间上界或分析说明 & 适用条件 & 队列空间\\\midrule
-标准库懒删除 & $O(n+m\log(m+1))$ & 非负权；可重复条目 & $O(m+1)$\\
-索引二叉堆 & $O((n+m)\log(n+1))$ & 非负权；可直接减键 & $O(n)$\\
-段树堆 & $O((n+m)\log(n+1))$ & 顶点固定映射为叶子 & $O(n)$\\
-Fibonacci 堆 & $O(m+n\log(n+1))$，摊还 & 非负权；直接定位节点 & $O(n)$\\
-PBDS 两种堆 & 依库堆的具体摊还界，不在本项目中证明 & GCC 扩展与有效句柄 & $O(n)$\\
-Radix heap & 按键位宽 $B$ 计为 $O(m+nB)$ 的桶迁移分析 & 非负整数；单调键与容量限制 & $O(n+B)$\\
-FIFO SPFA & 与成功松弛和重复入队有关，存在坏例 & 本实验只使用非负权 & 依实际条目数\\
-SLF+LLL & 启发式不能保证 Dijkstra 式效率 & 本实验只使用非负权 & $O(n)$\\\bottomrule
+\caption{Cost and applicable conditions of each queue strategy}\label{tab:bounds}
+\begin{tabularx}{\linewidth}{%
+  >{\raggedright\arraybackslash}p{3.25cm}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}p{3.55cm}
+  >{\raggedright\arraybackslash}p{2.2cm}}\toprule
+Strategy & Time bound or analysis & Applicable conditions & Queue space\\\midrule
+Standard-library lazy deletion & $O(n+m\log(m+1))$ & Nonnegative weights; duplicate entries allowed & $O(m+1)$\\
+Indexed binary heap & $O((n+m)\log(n+1))$ & Nonnegative weights; direct decrease-key & $O(n)$\\
+Segment-tree heap & $O((n+m)\log(n+1))$ & Fixed vertex-to-leaf mapping & $O(n)$\\
+Fibonacci heap & $O(m+n\log(n+1))$, amortized & Nonnegative weights; direct node access & $O(n)$\\
+Two PBDS heaps & Depends on the selected library heap; not derived here & GCC extension and valid handles & $O(n)$\\
+Radix heap & Bucket-migration cost $O(m+nB)$ for key bit width $B$ & Nonnegative integer keys; monotone keys and capacity limits & $O(n+B)$\\
+FIFO SPFA & Depends on successful relaxations and repeated enqueues; worst-case behavior can be poor & Only nonnegative weights are used here & Depends on the number of entries\\
+SLF+LLL & Heuristic scheduling provides no Dijkstra-style worst-case guarantee & Only nonnegative weights are used here & $O(n)$\\\bottomrule
 \end{tabularx}\end{table}
 
-对 Fibonacci 堆，所有弧扫描和成功减键总计 $O(m)$，每个顶点至多一次有效取最小值，
-合计 $O(n\log n)$。稀疏图上该界与二叉堆同阶，但前者每次操作涉及多条链接维护，
-理论差异不保证常数因子更小。
-Radix heap 的分析利用桶重分配时编号降低；若最大有效键界为 $U$，可令
-$B=\lceil\log_2(U+1)\rceil$。文献中的专门 radix 设计可给出
-$O(m+n\log C)$ 的 Dijkstra 界（$C$ 为边权上界）\cite{radix}；
-本项目没有证明其有限 32 桶和压缩句柄实现满足文献全部设定，因此不直接照搬更紧的界。
+For the Fibonacci heap, all arc scans and successful decrease-key operations total
+$O(m)$, and each vertex is involved in at most one effective extract-min, for a
+total of $O(n\log n)$. On sparse graphs, this bound has the same order as that of a
+binary heap, but each Fibonacci-heap operation maintains more links, so the
+asymptotic difference does not necessarily yield a smaller constant.
 
-本轮没有采集各算法的峰值内存曲线、硬件缓存计数、成功松弛次数或桶重分配次数。
-空间复杂度分析来自数据结构，不能当作已经完成的内存实测。
+The analysis of the radix heap relies on bucket indices decreasing during
+redistribution. If the largest valid key is bounded by $U$, then
+$B=\lceil\log_2(U+1)\rceil$. The specialized radix design in the literature yields
+an $O(m+n\log C)$ bound for Dijkstra's algorithm, where $C$ is the edge-weight upper
+bound \cite{radix}. The present implementation uses 32 buckets and compressed
+handles and does not exactly match all assumptions of that design, so the tighter
+bound is not adopted here.
 
-\subsection{为何 Fibonacci 堆没有最快}
-本轮 NY、BAY 的平均出度只有约 2.78 和 2.49，属于稀疏路网。
-Fibonacci 堆减少了减键的渐近代价，但仍须执行合并同度根、维护链表和级联剪切。
-其节点虽然一次性分配在数组中，操作依然沿节点链接跳转；二叉堆的大部分状态则是紧凑数组。
-较多的链接操作及访问模式可能解释部分差距，这是基于实现结构的解释，
-尚需性能计数器与操作计数实验验证，不能把缓存未命中当作本轮已经观察到的事实。
+This study did not collect peak-memory curves, hardware cache counters, the number
+of successful relaxations, or the number of bucket redistributions. The space
+analysis follows from the data structures and is not a measured memory result.
 
-稠密族中边扫描工作随 $n^2$ 增长，堆维护占比可能下降，因此某些队列的差距缩小。
-本轮最大稠密规模为 $n=4096$，不存在“在足够大规模最终谁胜出”的实验结论。
-随机图的最大顶点规模虽较大，但它属于另一种稀疏度，不能拿来代替大规模稠密实验。
+\subsection{Observed Performance of the Fibonacci Heap}
+The NY and BAY road networks have average out-degrees of only about 2.78 and 2.49,
+respectively, and are therefore sparse. The Fibonacci heap reduces the asymptotic
+cost of decrease-key, but it must still consolidate roots of equal degree, maintain
+linked lists, and perform cascading cuts. Although the nodes are allocated
+contiguously in an array, each operation follows node links, whereas most binary-heap
+state resides in compact arrays. More frequent link updates and poorer locality may
+explain part of the gap. This is an inference from the implementation structure and
+would require operation counts and performance-counter data to evaluate. No metrics
+that directly distinguish cache misses were collected.
 
-\subsection{Radix 与 SPFA 结果的意义}
-在非负整数路网上，radix heap 利用键的单调性，减少比较堆中的上浮和下沉工作，
-成为本轮七种 Dijkstra 队列中最快的一种。
-它仍要求正确的键范围与句柄容量，不能直接替换一般实数键或非单调任务中的优先队列。
+In the dense family, edge scanning grows with $n^2$ and heap maintenance may account
+for a smaller fraction of the total time, reducing some gaps between queues. The
+largest dense case in this study has only $n=4096$, which is insufficient to determine
+the eventual winner at large scale. Although the random graphs reach larger vertex
+counts, their sparsity is entirely different, so they cannot substitute for
+large-scale dense experiments.
 
-SLF+LLL 在两图上比所有堆版本更快，FIFO 版本却慢一个数量级以上。
-这说明标签修正算法高度依赖调度顺序，不能只以“都是 SPFA”推断性能。
-两种实现还分别使用重复条目与在队标记，故差距也不能只归因于 SLF/LLL 一个因素。
-随机图上的良好表现不构成对抗输入下的效率保证。
+\subsection{Differences between the Radix Heap and SPFA}
+On nonnegative-integer road networks, the radix heap exploits the monotonicity of
+keys and avoids much of the sift-up and sift-down work in comparison heaps. It is the
+fastest of the seven Dijkstra queues in this study. It still requires valid key
+ranges and sufficient handle capacity, so it cannot directly replace a general
+priority queue for real-valued or non-monotone keys.
 
-\subsection{模型拟合与测量限制}
-\plotfigure{complexity-normalized}{按预设模型归一化的 CPU 时间。曲线并非严格常数；该图用于观察模型偏差与有限规模效应，不用于证明复杂度。}{fig:normalized}
-本轮复杂度图是有限个离散规模上的计时。归一化曲线的变化既可能来自
-算法操作数变化，也可能来自缓存、编译器、频率或输入可达性变化。
-RMS 小只能说明所选范围内模型贴合，不能排除另一种模型或推出紧确界。
+SLF+LLL is faster than every heap implementation on both networks, while FIFO SPFA is
+more than an order of magnitude slower. Changing only the scheduling order of SPFA
+thus changes performance substantially. The two implementations also use different
+memory strategies, duplicate entries versus an in-queue marker, so their gap cannot
+be attributed solely to SLF or LLL. Good performance on the random graphs does not
+guarantee efficiency on adversarial inputs.
 
-三轮随机/复杂度实验不足以稳定估计尾部分布；路网只有单批次、无逐查询分布，
-两个路网规模也不足以作可靠的规模拟合。WSL 共享宿主硬件，本轮未固定 CPU 亲和性
-或测量宿主负载；绝对时间需复验。多实现对拍和单元测试仍不等于形式化证明。
+\subsection{Model Fitting and Measurement Limitations}
+\plotfigure{complexity-normalized}{CPU time normalized by the prescribed models. The curves are not strictly constant; the figure is intended only to show model deviation and finite-size effects.}{fig:normalized}
+The complexity plots record timings at a finite set of discrete sizes. Changes in a
+normalized curve may come from the algorithm's operation count or from caching,
+compilation, clock frequency, or input reachability. A small RMS indicates only that
+the model fits the observed range; it does not rule out another model or establish a
+tight bound.
 
-\subsection{后续改进与底稿结论}
-后续应增加路网独立批次与逐查询记录，扩大经校验的图规模；
-记录松弛、过期条目、合并与桶迁移次数，并用性能计数器检验常数开销的解释。
-若研究真正的点对点查询，应统一加入目标提前终止，再考虑双向搜索或预处理算法。
+Three repetitions of the random and complexity experiments are insufficient to
+estimate tail behavior reliably. The road networks have only one batch and no
+per-query distribution, and the two network sizes are insufficient for a reliable
+scaling fit. WSL shares the host hardware, and CPU affinity and host load were not
+controlled, so absolute times serve only as a reference for this run.
 
-本轮结果说明，理论摊还优势与实际运行速度需要分别评价，实测结论也应受输入范围约束。
+\subsection{Further Improvements}
+Further work should add independent road-network batches and per-query records, as
+well as larger graph sizes. It should also record the numbers of relaxations,
+outdated entries, root consolidations, and bucket redistributions, together with
+performance-counter data that can explain constant-factor costs. For true
+point-to-point queries, the implementations should first apply a common
+target-termination rule before introducing bidirectional search or preprocessing
+algorithms.
+
+The amortized bounds did not determine the observed ordering. On the sparse road
+networks, the theoretical advantage of the Fibonacci heap did not translate into
+speed, while the radix heap and suitably scheduled SPFA were faster. This ordering
+remains specific to the present inputs and implementations.
 \FloatBarrier
