@@ -1,37 +1,45 @@
-\section{引言}
+\section{Introduction}
 \label{sec:intro}
-\subsection{问题与目标}
-给定有向图 $G=(V,E)$、非负边权 $w:E\to\mathbb{Z}_{\ge0}$ 和源点 $s$，
-求从 $s$ 到各顶点的最短距离 $d[v]$。不可达顶点的距离记作 $\infty$。
-记 $n=|V|$、$m=|E|$；本文的 $m$ 始终指有向弧条数。
-课程项目要求使用至少两种堆结构且包含 Fibonacci 堆，
-在 USA 路网中至少评测 1000 对查询，并给出运行时间、规模曲线与分析。
+\subsection{Problem Description and Objectives}
+Given a directed graph $G=(V,E)$, nonnegative edge weights
+$w:E\to\mathbb{Z}_{\ge0}$, and a source vertex $s$, the single-source shortest-path
+problem asks for the shortest distance $d[v]$ from $s$ to every vertex. The distance
+to an unreachable vertex is denoted by $\infty$. Let $n=|V|$ and $m=|E|$; throughout
+this report, $m$ refers to the number of directed arcs.
 
-Dijkstra 的贪心顺序依赖最小优先队列。二叉堆、段树及 Fibonacci 堆
-对插入、减键和取最小元素的处理方式不同，因而具有不同的渐近代价和实际常数。
-对非负整数距离，还可以使用单调的 radix heap。
-本报告关注两个问题：理论上更便宜的减键操作能否转化为实际收益；
-固定图结构和输入后，不同实现的速度次序如何变化。
+Dijkstra's greedy order depends on a minimum-priority queue. Binary heaps, segment
+trees, and Fibonacci heaps handle insertion, decrease-key, and extract-min
+differently, which leads to different asymptotic costs and implementation constants.
+When distances are nonnegative integers, a monotonic radix heap is another option.
 
-\subsection{实现与实验范围}
-七种 Dijkstra 队列为标准库优先队列、手写二叉堆、段树堆、Fibonacci 堆、
-radix heap、GNU PBDS pairing heap 和 thin heap。
-除标准库版本以重复插入模拟减键外，其他版本支持按顶点定位并更新键。
-FIFO SPFA 与 SLF+LLL SPFA 是基于队列的标签修正算法，不属于 Dijkstra 的堆变体，
-在报告中作为独立参照。
+The study addresses two questions: whether the lower theoretical cost of
+decrease-key operations translates into faster searches, and how the speed ordering
+of the implementations changes with graph structure.
 
-所有实现共用 \code{general-dijkstra.hpp} 中的算法主循环以及 CSR 图。
-随机图与固定密度实验对同组参数使用固定种子 42 和同一个生成规则。
-路网采用 \code{USA-road-d.NY} 与 \code{USA-road-d.BAY}，
-查询文件是项目生成的 1000 对随机查询，种子为 971；查询文件不是官方原始下载。
-本轮未测试 NE、E 或全美 USA 图，结论不外推到这些规模。
+\subsection{Implementations and Experimental Scope}
+We implemented and compared seven queues for Dijkstra's algorithm: the standard
+library priority queue, a custom binary heap, a segment-tree heap, a Fibonacci heap,
+a radix heap, the GNU PBDS pairing heap, and the GNU PBDS thin heap. Except for the
+standard-library version, which simulates decrease-key by inserting duplicate
+entries, the implementations support locating a vertex and updating its key.
+FIFO SPFA and SLF+LLL SPFA are queue-based label-correcting algorithms rather than
+heap variants of Dijkstra's algorithm, and they are treated separately in this report.
 
-\subsection{本轮结果的解释边界}
-尽管路网输入格式为点对点查询，现有算法会从每个源点计算完整距离数组，
-直到队列为空，目标点仅用于取校验和。
-因此本文的“ms/查询”是\textbf{一个点对触发一次完整单源搜索的平均时间}，
-不能等同于遇到目标点即停止的点对点搜索延迟。
-本轮不包含路径恢复、预处理索引或多线程并行搜索。
+All implementations share the main loop in \code{general-dijkstra.hpp} and the same
+CSR graph representation. Random-graph and fixed-density experiments use seed 42
+and the same graph-generation rule for each parameter set. The road-network
+experiments use \code{USA-road-d.NY} and \code{USA-road-d.BAY}, with 1,000 generated
+random source-target queries and seed 971.
 
-随机图和复杂度实验每组重复三轮；每个路网实现仅运行一个包含 1000 查询的批次。
-所有图表和表格都来自同一轮已校验的 CSV 快照，避免把旧报告中的测量值混入比较。
+\subsection{Experimental Setup}
+Although the road-network input is expressed as point-to-point queries, the current
+algorithms compute the complete distance array from each source and drain the queue.
+The target vertex does not trigger early termination. Consequently, the reported
+``ms/query'' is \textbf{the mean time for a complete single-source search triggered
+by one source-target pair}; it is not the latency of a point-to-point search that
+stops at the target. This study does not include path recovery, preprocessing
+indices, or parallel search.
+
+Random-graph and fixed-density experiments are repeated three times for each
+configuration. Each road-network implementation runs one complete batch containing
+1,000 queries.

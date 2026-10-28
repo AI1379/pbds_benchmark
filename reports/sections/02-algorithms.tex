@@ -1,25 +1,27 @@
-\section{数据结构与算法说明}
+\section{Data Structure / Algorithm Specification}
 \label{sec:algorithms}
-\subsection{CSR 图与共享接口}
-顶点编号为 $1,\ldots,n$。CSR 使用连续边数组和长度为 $n+1$ 的偏移数组，
-按起点将弧分组；顺序访问某顶点的邻接弧需要与该顶点出度成正比的时间。
-边保存终点与整数权重，最短距离使用 64 位有符号整数。
-距离数组的初始无穷大取该类型最大值的四分之一，为本轮输入的距离加法留出余量；
-该实现没有覆盖任意大输入的通用溢出检测。
+\subsection{CSR Graph and Shared Interface}
+Vertices are numbered $1,\ldots,n$. The CSR representation stores a contiguous
+edge array and an offset array of length $n+1$, grouping arcs by their source.
+Visiting the outgoing arcs of a vertex therefore takes time proportional to its
+out-degree. Each edge stores a destination and an integer weight, and shortest
+distances use signed 64-bit integers. The initial infinity value is set to one
+quarter of the maximum value of this type, which leaves headroom for distance
+addition over the inputs used here. The implementation does not provide general
+overflow detection for arbitrarily large inputs.
 
-优先队列对外提供 \code{push_or_decrease(key,v)}、\code{pop()}、
-\code{empty()} 和 \code{clear()}。支持减键的实现通过顶点索引定位元素，
-共享基类用时间戳区分本轮在堆中的顶点。
-\code{pop()} 后清除对应在堆标记，完整搜索结束时队列必须为空并可复用。
+The priority-queue interface provides \code{push_or_decrease(key,v)}, \code{pop()},
+\code{empty()}, and \code{clear()}. Implementations that support decrease-key use
+the vertex index to locate an entry, while a shared base class uses timestamps to
+identify the current in-heap entry. \code{pop()} clears the corresponding in-heap
+marker. The queue must be empty at the end of a complete search and can then be reused.
 
-\subsection{Dijkstra 的主循环与正确性}
-非负权重保证：取出的最小有效标签不会再被后来经过未处理顶点的路径改进。
-初始时源点距离为零；每次松弛只用已发现路径的长度更新标签，
-因而有限标签始终对应某条实际路径。结合最小有效标签的定型性质，
-归纳可得搜索结束后所有可达顶点距离正确。
-标准库版本可能含有旧键，故主循环统一执行过期条目检查。
+\subsection{Main Dijkstra Loop}
+The source distance is initialized to zero, and each relaxation updates a label
+using the length of an already discovered path. The standard-library version may
+contain stale keys, so the main loop skips outdated entries.
 
-\begin{lstlisting}[caption={共享 Dijkstra 伪代码}]
+\begin{lstlisting}[caption={Shared Dijkstra pseudocode}]
 DIJKSTRA(G, s, Q):
   fill d[0..n] with INF
   d[s] = 0; Q.push_or_decrease(0, s)
@@ -33,36 +35,43 @@ DIJKSTRA(G, s, Q):
   return d
 \end{lstlisting}
 
-\subsection{二叉堆、段树与 PBDS}
-\textbf{标准库优先队列。}最小堆保存 $(d,v)$。
-每次改进距离直接插入新条目，取出时丢弃旧条目。
-因此堆中可能同时有同一顶点的多个键，空间随成功松弛次数增长。
+\subsection{Binary Heap, Segment Tree, and PBDS}
+\textbf{Standard-library priority queue.} The minimum heap stores $(d,v)$ pairs.
+Each distance improvement inserts a new entry, and outdated entries are discarded
+when removed. The heap may therefore contain multiple keys for the same vertex,
+and its space usage grows with the number of successful relaxations.
 
-\textbf{手写二叉堆。}数组 \code{heap[pos]} 保存顶点，
-\code{idx[v]} 保存位置，\code{key[v]} 保存当前键。
-插入把顶点放到末尾并上浮；减键从 \code{idx[v]} 上浮；
-取最小值把末尾移到根并下沉，每次交换同步更新两个顶点的位置。
-每个在堆顶点只有一个条目。
+\textbf{Custom binary heap.} The array \code{heap[pos]} stores vertices,
+\code{idx[v]} stores positions, and \code{key[v]} stores the current keys. Insertion
+places a vertex at the end and sifts it upward; decrease-key starts from
+\code{idx[v]} and also sifts upward. Extract-min moves the last vertex to the root
+and sifts it downward, with every swap updating the positions of both vertices.
+Each vertex has at most one entry in the heap.
 
-\textbf{段树堆。}每个顶点对应一个叶子，内部结点保存子区间的最小键及其顶点。
-插入或减键沿根路径更新；取最小值读取根的顶点，再将相应叶子置为 $\infty$。
-更新过程中即使最小值不变，只要对应顶点改变也必须继续传播，
-以避免相等键导致过期顶点；最大编号顶点与哨兵叶子必须分开。
+\textbf{Segment-tree heap.} Each vertex corresponds to a leaf, and each internal
+node stores the minimum key in its interval and the associated vertex. Insertion
+and decrease-key update the path to the root. Extract-min reads the vertex stored
+at the root and sets its leaf to $\infty$. Even when the minimum key itself does not
+change, propagation must continue if the minimizing vertex changes, preventing
+stale vertices with equal keys. The largest vertex index and the sentinel leaf are
+kept separate.
 
-\textbf{PBDS pairing 与 thin heap。}适配器保存每个顶点的
-\code{point_iterator}，首次入堆调用 \code{push}，随后用
-\code{modify} 更新条目。内部堆序维护交给 GNU 库。
-本项目没有重新实现两种库堆，也不把它们的减键摊还界简单等同于 Fibonacci 堆。
+\textbf{PBDS pairing and thin heaps.} The adaptor stores a \code{point_iterator}
+for each vertex. The first insertion calls \code{push}, and later updates use
+\code{modify}. Internal heap-order maintenance is delegated to the GNU library.
+This project does not reimplement either library heap and does not equate their
+decrease-key amortized bounds with that of a Fibonacci heap.
 
-\subsection{Fibonacci 堆}
-每个顶点在预先分配的节点数组中对应一个槽位。
-节点包含键、父亲、孩子、左右兄弟指针、度数和标记；
-根表与孩子表均采用循环双向链表，另存最小根指针。
-插入只将单节点树并入根表；取最小值时提升其孩子，
-再按度数合并同度树。实现通过摘下当前根再处理的方式遍历根表，
-避免一边合并一边依赖失效的循环终止点。
+\subsection{Fibonacci Heap}
+Each vertex has a slot in a preallocated node array. A node stores its key, parent,
+children, left and right sibling pointers, degree, and mark. Both the root list and
+the child lists are circular doubly linked lists, with a separate pointer to the
+minimum root. Insertion splices a singleton tree into the root list. Extract-min
+promotes the children of the minimum root and then links trees of equal degree.
+The root list is processed by unlinking the current root, which avoids relying on a
+circular termination point that can become invalid while consolidation is in progress.
 
-\begin{lstlisting}[caption={Fibonacci 堆的关键操作}]
+\begin{lstlisting}[caption={Key operations of the Fibonacci heap}]
 INSERT(v, key):
   initialize node[v] as a singleton unmarked root
   splice node[v] into root list; update minimum
@@ -81,21 +90,26 @@ DECREASE(v, key):
   update minimum if needed
 \end{lstlisting}
 
-标记记录非根节点是否已失去一个孩子。势函数可取
-$\Phi=t+2q$，其中 $t$ 为根数，$q$ 为标记节点数；
-级联剪切造成的标记减少可支付剪切代价。
-Fibonacci 堆由此支持摊还 $O(1)$ 的插入和减键、摊还 $O(\log n)$ 的取最小值，
-得到 Dijkstra 的 $O(m+n\log n)$ 界\cite{fredman}。
-该界描述总操作序列，并不保证每一次取最小值都只需对数时间。
+A mark records whether a non-root node has already lost one child. A potential
+function may be chosen as $\Phi=t+2q$, where $t$ is the number of roots and $q$ is
+the number of marked nodes. The reduction in marks caused by cascading cuts pays
+for the cut operations. The Fibonacci heap therefore supports amortized $O(1)$
+insertion and decrease-key, amortized $O(\log n)$ extract-min, and the
+$O(m+n\log n)$ bound for Dijkstra's algorithm \cite{fredman}. This bound describes
+the total sequence of operations; it does not imply that every extract-min takes
+logarithmic time.
 
-\subsection{单调 radix heap}
-radix heap 保存上次取出的键 $L$。
-键 $k$ 放入编号 $b(k)=\operatorname{bitwidth}(k\mathbin{\mathrm{xor}}L)$ 的桶，
-其中桶零只含等于 $L$ 的键。若桶零为空，从最小非空桶找出最小键作为新 $L$，
-并按新 $L$ 重新分配该桶；重新分配后的桶编号会减小。
-减键使用记录了桶编号和桶内位置的句柄，跨桶移动时交换删除并修复被交换元素的句柄。
+\subsection{Monotonic Radix Heap}
+The radix heap stores the most recently extracted key $L$. A key $k$ is placed in
+the bucket numbered $b(k)=\operatorname{bitwidth}(k\mathbin{\mathrm{xor}}L)$; bucket
+zero contains only keys equal to $L$. If bucket zero is empty, the smallest key in
+the lowest nonempty bucket becomes the new $L$, and that bucket is redistributed
+according to the new $L$. Redistribution reduces the bucket indices.
+Decrease-key uses a handle that records the bucket index and the entry's position
+within the bucket. A cross-bucket move swaps entries and repairs the handle of the
+swapped entry.
 
-\begin{lstlisting}[caption={Radix heap 的取最小值}]
+\begin{lstlisting}[caption={Extract-min in the radix heap}]
 POP():
   if bucket[0] is empty:
     b = smallest nonempty bucket id
@@ -105,24 +119,30 @@ POP():
   if all buckets are empty: reset L = 0 for the next query
 \end{lstlisting}
 
-合法插入要求 $k\ge L$，而非要求所有插入键按全局顺序递增。
-Dijkstra 的非负边权保证新发现候选距离不小于当前取出的有效距离，符合这一约束。
-当前实现只有 32 个桶，桶内位置句柄占 25 位；
-它不是任意 64 位键范围上的通用 radix heap。
-本报告仅针对已通过交叉校验的输入，未来扩大距离或桶容量范围时需先修改实现并验证边界。
+A valid insertion requires $k\ge L$; it does not require all inserted keys to be
+globally increasing. Nonnegative edge weights in Dijkstra's algorithm ensure that a
+newly discovered candidate distance is no smaller than the most recently extracted
+valid distance, which satisfies this condition. The current implementation has 32
+buckets and uses 25 bits for the position information in each handle. It is not a
+general radix heap for arbitrary 64-bit key ranges.
 
-\subsection{两种标签修正参照算法}
-\textbf{FIFO SPFA。}队列存 $(d,v)$ 条目；成功松弛后插入新条目，
-取出后跳过过期距离。它没有单独的在队标记，可能出现重复条目，
-因此内存和操作次数不应直接套用“一顶点一个队列项”的分析。
+\subsection{Two Label-Correcting Algorithms}
+\textbf{FIFO SPFA.} The queue stores $(d,v)$ entries, and each successful
+relaxation inserts a new entry. Outdated distances are skipped when an entry is
+removed. There is no separate in-queue marker, so duplicate entries are possible;
+memory use and operation counts therefore should not be analyzed as if each vertex
+had exactly one queue entry.
 
-\textbf{SLF+LLL SPFA。}双端队列只存顶点，并维护在队标记。
-成功松弛未在队的顶点时，若其标签小于队首则从前端插入（SLF），否则插到后端。
-处理队首前，若其标签大于在队顶点的平均标签，则移至队尾（LLL）。
-通过标签总和维护平均值，队内顶点标签减少时同步更新总和。
-两条启发规则只调整松弛顺序，不提供 Dijkstra 式的出队定型保证。
+\textbf{SLF+LLL SPFA.} The deque stores vertices and maintains an in-queue marker.
+When a successful relaxation improves a vertex that is not queued, the vertex is
+pushed to the front if its label is smaller than the current front label (SLF);
+otherwise it is pushed to the back. Before processing the front vertex, the
+algorithm moves it to the back if its label is greater than the average label of
+queued vertices (LLL). The average is maintained from the sum of queued labels and
+updated when an already queued label decreases. These heuristics change only the
+relaxation order and provide no Dijkstra-style finalization guarantee.
 
-\begin{lstlisting}[caption={SLF+LLL 的队列调度规则}]
+\begin{lstlisting}[caption={Queue scheduling rules for SLF+LLL},float=t]
 ENQUEUE(v):
   if queue empty or d[v] < d[front]: push_front(v)
   else: push_back(v)

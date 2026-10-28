@@ -1,73 +1,79 @@
-\section{源代码与复现说明}
-\subsection{源码组织}
-源码位于项目的 \code{pq-test/} 下。以下给出与本报告对应的文件，
-完整源码是否需要逐页附入报告，以当前课程要求为准。
+\section{Source Code and Reproduction}
+\subsection{Source Code Organization}
+The source code is located under \code{pq-test/} in the project. The main files
+relevant to this report are listed below.
 \begin{table}[H]\centering\small
-\caption{主要源码与功能对应}
+\caption{Main source files and their roles}
 \begin{tabularx}{\linewidth}{lX}\toprule
-文件 & 功能\\\midrule
-\code{csr-graph.hpp}、\code{dimacs-parser.hpp} & 共享图结构与文件解析\\
-\code{general-dijkstra.hpp} & 共用 Dijkstra 主循环\\
-\code{heap-adaptor.hpp} & 时间戳接口、标准库与 PBDS 适配器\\
-\code{binary-heap.hpp}、\code{segment-tree-heap.hpp} & 二叉堆与段树\\
-\code{fibonacci-heap.hpp}、\code{radix-heap.hpp} & Fibonacci 与 radix heap\\
-\code{general-bellman-ford.hpp} & 两种标签修正算法\\
-\code{dij-bench-v2.cpp} & 随机图参数扫描\\
-\code{dij-bench-complexity.cpp} & 固定密度复杂度实验\\
-\code{dij-bench-dimacs.cpp} & 路网查询批次基准\\
-\code{heap-adaptor-test.cpp}、\code{dimacs-parser-test.cpp} & 接口、差分、回归及解析测试\\\bottomrule
+File & Role\\\midrule
+\code{csr-graph.hpp}, \code{dimacs-parser.hpp} & Shared graph representation and file parsing\\
+\code{general-dijkstra.hpp} & Shared main Dijkstra loop\\
+\code{heap-adaptor.hpp} & Timestamp interface, standard-library adaptor, and PBDS adaptors\\
+\code{binary-heap.hpp}, \code{segment-tree-heap.hpp} & Binary heap and segment-tree heap\\
+\code{fibonacci-heap.hpp}, \code{radix-heap.hpp} & Fibonacci heap and radix heap\\
+\code{general-bellman-ford.hpp} & Two label-correcting algorithms\\
+\code{dij-bench-v2.cpp} & Random-graph parameter sweep\\
+\code{dij-bench-complexity.cpp} & Fixed-density complexity experiments\\
+\code{dij-bench-dimacs.cpp} & Road-network query benchmark\\\bottomrule
 \end{tabularx}\end{table}
 
-下列节选保留实际主循环逻辑，省略文件头中的身份信息，并补充解释性注释。
-它用于说明共享接口，不替代完整源码提交。
+The following excerpt shows the main loop in \code{general-dijkstra.hpp} and how the
+core logic is shared across different heap implementations.
 
 \noindent\begin{minipage}{\linewidth}
-\lstinputlisting[language=C++,caption={共享主循环节选}]{code/dijkstra.hpp}
+\lstinputlisting[language=C++,caption={Excerpt of the shared main loop}]{code/dijkstra.hpp}
 \end{minipage}
 
-\drafttodo{课程结构要求规定提交源码至少 30\% 的行带有注释。此底稿没有声称项目全部源码已满足该比例。
-正式提交前需按课程口径审查实际提交的源码，并补全必要注释；不能用本页注释比例替代整体审查。}
+% \subsection{数据与作图复现}
+% \code{reports/data/} 保留 CSV 快照及经过匿名化处理的溯源信息。
 
-\subsection{数据与作图复现}
-\code{reports/data/} 保留 CSV 快照、测量校验结果及经过匿名化处理的溯源信息。
+% 总表 \code{all-results.csv} 含 2151 行；计时汇总
+% \code{timing-summary.csv} 含 315 组配置。
+% 脚本从 \code{run_type=iteration} 的 909 条原始测量行重新计算均值和标准差，
+% 不会把均值、CV 或 RMS 行当作新样本。
 
-总表 \code{all-results.csv} 含 2151 行；计时汇总
-\code{timing-summary.csv} 含 315 组配置。
-脚本从 \code{run_type=iteration} 的 909 条原始测量行重新计算均值和标准差，
-不会把均值、CV 或 RMS 行当作新样本。
+% 在项目根目录执行：
+% \begin{lstlisting}
+% python -m pip install -r tools/requirements-plot.txt
+% python tools/plot_benchmarks.py
+% python reports/build_report.py
+% \end{lstlisting}
+% 各作图脚本也可独立运行，并通过 \code{--data-dir}、\code{--output-dir} 指定目录。
+% 图同时保存为矢量 PDF 和 PNG；表格由 \code{generate_report_tables.py} 生成到
+% \code{reports/tables/}，不应手工改动数值。
 
-在项目根目录执行：
-\begin{lstlisting}
-python -m pip install -r tools/requirements-plot.txt
-python tools/plot_benchmarks.py
-python reports/build_report.py
-\end{lstlisting}
-各作图脚本也可独立运行，并通过 \code{--data-dir}、\code{--output-dir} 指定目录。
-图同时保存为矢量 PDF 和 PNG；表格由 \code{generate_report_tables.py} 生成到
-\code{reports/tables/}，不应手工改动数值。
+% 从源码重新执行 benchmark 的基本步骤如下；不同机器请自行指定构建目录和路网数据目录。
 
-从源码重新执行 benchmark 的基本步骤如下；不同机器请自行指定构建目录和路网数据目录。
+% \noindent\begin{minipage}{\linewidth}
+% \begin{lstlisting}
+% cmake -S . -B build-wsl -G Ninja -DCMAKE_BUILD_TYPE=Release
+% cmake --build build-wsl --target dij-bench-v2 dij-bench-complexity dij-bench-dimacs
+% build-wsl/pq-test/dij-bench-v2 --benchmark_min_time=0.5s \
+%   --benchmark_repetitions=3 --benchmark_out=random.json \
+%   --benchmark_out_format=json
+% build-wsl/pq-test/dij-bench-complexity --benchmark_min_time=0.5s \
+%   --benchmark_repetitions=3 --benchmark_out=complexity.json \
+%   --benchmark_out_format=json
+% build-wsl/pq-test/dij-bench-dimacs --gr DATA/USA-road-d.NY.gr \
+%   --benchmark_repetitions=1 --benchmark_out=ny.json \
+%   --benchmark_out_format=json
+% build-wsl/pq-test/dij-bench-dimacs --gr DATA/USA-road-d.BAY.gr \
+%   --benchmark_repetitions=1 --benchmark_out=bay.json \
+%   --benchmark_out_format=json
+% \end{lstlisting}
+% \end{minipage}
+% 本地原始运行目录另保留从 JSON 导出 CSV 的脚本和完整命令。
+% 若采用新的参数或查询集，应保留新的溯源文件并重新生成图表；本报告数据快照不会自动替换。
 
-\noindent\begin{minipage}{\linewidth}
-\begin{lstlisting}
-cmake -S . -B build-wsl -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build-wsl --target heap-adaptor-test dimacs-parser-test \
-  dij-bench-v2 dij-bench-complexity dij-bench-dimacs
-ctest --test-dir build-wsl --output-on-failure
-build-wsl/pq-test/dij-bench-v2 --benchmark_min_time=0.5s \
-  --benchmark_repetitions=3 --benchmark_out=random.json \
-  --benchmark_out_format=json
-build-wsl/pq-test/dij-bench-complexity --benchmark_min_time=0.5s \
-  --benchmark_repetitions=3 --benchmark_out=complexity.json \
-  --benchmark_out_format=json
-build-wsl/pq-test/dij-bench-dimacs --gr DATA/USA-road-d.NY.gr \
-  --benchmark_repetitions=1 --benchmark_out=ny.json \
-  --benchmark_out_format=json
-build-wsl/pq-test/dij-bench-dimacs --gr DATA/USA-road-d.BAY.gr \
-  --benchmark_repetitions=1 --benchmark_out=bay.json \
-  --benchmark_out_format=json
-\end{lstlisting}
-\end{minipage}
-本地原始运行目录另保留从 JSON 导出 CSV 的脚本和完整命令。
-若采用新的参数或查询集，应保留新的溯源文件并重新生成图表；本报告数据快照不会自动替换。
+% \clearpage
+\subsection{Random and Fixed-Density Graph Reachability Results}
+The following listing gives the vertex and reachable-arc counts for each graph size.
+These counts are used when interpreting the random-graph and complexity timings.
+
+\clearpage
+\lstinputlisting[
+  caption={Reachability results for the random and fixed-density graphs},
+  label={lst:reachability},
+  basicstyle=\ttfamily\scriptsize\linespread{1.0}\selectfont
+]{data/random-reachability.csv}
 \FloatBarrier

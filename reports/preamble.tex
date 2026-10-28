@@ -3,8 +3,10 @@
 \usepackage{graphicx,xcolor,listings,enumitem,caption,placeins,fancyhdr,float}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue,
-  pdftitle={不同优先队列下 Dijkstra 算法的实现与评测},pdfauthor={},
-  pdfsubject={项目二报告底稿与可复现实验},pdfcreator={XeLaTeX}}
+  pdftitle={Implementation and Evaluation of Dijkstra's Algorithm with Different Priority Queues},
+  pdfauthor={},
+  pdfsubject={Implementation, benchmarking, and analysis of priority queues for Dijkstra's algorithm},
+  pdfcreator={XeLaTeX}}
 \graphicspath{{figures/}}
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0.2em}
@@ -14,16 +16,16 @@
 \raggedbottom
 \setlist{itemsep=0.15em,topsep=0.3em}
 \captionsetup{font=small,labelfont=bf}
-\ctexset{section={name={第,章},number=\arabic{section}},subsection={format=\large\bfseries}}
+\ctexset{section={name={Chapter\hspace{0.55em}},aftername={\quad},number=\arabic{section}},
+  subsection={format=\large\bfseries}}
 \setcounter{tocdepth}{2}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small Dijkstra 算法与优先队列}
-\fancyhead[R]{\small 项目二报告底稿}
-\fancyfoot[C]{\thepage}
+\fancyhead[L]{\small Dijkstra's Algorithm and Priority Queues}
+\fancyhead[R]{\thepage}
 \renewcommand{\headrulewidth}{0.3pt}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
-\newcommand{\drafttodo}[1]{\ifDraftNotes\par\noindent\textbf{待补充：}#1\par\fi}
+\newcommand{\drafttodo}[1]{\ifDraftNotes\par\noindent\textbf{Note: }#1\par\fi}
 \newcommand{\plotfigure}[3]{%
   \begin{figure}[H]\centering
   \includegraphics[width=\linewidth]{#1.pdf}
@@ -32,3 +34,8 @@
 \lstset{basicstyle=\ttfamily\small\linespread{1.0}\selectfont,columns=fullflexible,breaklines=true,
   keepspaces=true,showstringspaces=false,numbers=left,numberstyle=\tiny,
   frame=lines,tabsize=2,captionpos=b}
+\renewcommand{\contentsname}{Contents}
+\renewcommand{\abstractname}{Abstract}
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\renewcommand{\lstlistingname}{Listing}

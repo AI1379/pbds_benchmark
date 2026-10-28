@@ -25,7 +25,7 @@ def main():
                      f"{road[('USA-road-d.NY', 'dijkstra_std')].wall_ms/ny.wall_ms:.2f}",
                      f"{road[('USA-road-d.BAY', 'dijkstra_std')].wall_ms/bay.wall_ms:.2f}"])
     write_table(args.output_dir / "dimacs.tex", "lrrrr",
-                ["实现", r"NY/ms", r"BAY/ms", r"NY/加速比", r"BAY/加速比"], rows)
+                ["Implementation", "NY/ms", "BAY/ms", "NY speedup", "BAY speedup"], rows)
     fits = {(r["scenario"], r["implementation"], r["aggregate_name"]): r
             for r in read_csv(args.data_dir / "complexity-fits.csv") if r["suite"] == "complexity"}
     rows = []
@@ -36,12 +36,13 @@ def main():
                        f"{float(fits[(family,a,'RMS')]['rms_percent']):.1f}\\%"]
         rows.append(values)
     write_table(args.output_dir / "fits.tex", "lrrrr",
-                ["实现", "稀疏系数", "稀疏 RMS", "稠密系数", "稠密 RMS"], rows)
+                ["Implementation", "Sparse coef.", "Sparse RMS",
+                 "Dense coef.", "Dense RMS"], rows)
     cases = [(2560, 327552), (40960, 327672), (81920, 327676)]
     random = {(p.n,p.m,p.algorithm): p for p in points if p.suite == "dij-v2"}
     rows = [[LABELS[a]] + [f"{random[(n,m,a)].cpu_ms:.3f}" for n,m in cases] for a in ALGORITHMS]
     write_table(args.output_dir / "random.tex", "lrrr",
-                ["实现", r"$n=2560$", r"$n=40960$", r"$n=81920$"], rows)
+                ["Implementation", r"$n=2560$", r"$n=40960$", r"$n=81920$"], rows)
     print("Generated dimacs.tex, fits.tex and random.tex")
 
 
