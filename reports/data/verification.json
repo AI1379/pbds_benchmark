@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "scope": {
+    "dij-v2": {
+      "cases": 171,
+      "measured_rows": 513,
+      "all_rows": 1215
+    },
+    "complexity": {
+      "cases": 126,
+      "measured_rows": 378,
+      "all_rows": 918
+    },
+    "dimacs-NY-1000": {
+      "cases": 9,
+      "measured_rows": 9,
+      "all_rows": 9
+    },
+    "dimacs-BAY-1000": {
+      "cases": 9,
+      "measured_rows": 9,
+      "all_rows": 9
+    }
+  },
+  "measured_rows": 909,
+  "all_csv_rows": 2151,
+  "timing_summary_rows": 315,
+  "dimacs_summary_rows": 18,
+  "source_unchanged": true
+}

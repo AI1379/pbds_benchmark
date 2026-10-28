@@ -15,7 +15,7 @@
 
 namespace dijkstra_bench {
 
-using Heap = StdHeapAdaptor;
+template <typename Heap>
 inline void dijkstra(const Graph &g, uint32_t s, std::vector<int64_t> &dis,
                      Heap &heap) {
   constexpr int64_t INF = std::numeric_limits<int64_t>::max() / 4;

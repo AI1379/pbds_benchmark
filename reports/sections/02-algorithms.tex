@@ -1,0 +1,138 @@
+\section{数据结构与算法说明}
+\label{sec:algorithms}
+\subsection{CSR 图与共享接口}
+顶点编号为 $1,\ldots,n$。CSR 使用连续边数组和长度为 $n+1$ 的偏移数组，
+按起点将弧分组；顺序访问某顶点的邻接弧需要与该顶点出度成正比的时间。
+边保存终点与整数权重，最短距离使用 64 位有符号整数。
+距离数组的初始无穷大取该类型最大值的四分之一，为本轮输入的距离加法留出余量；
+该实现没有覆盖任意大输入的通用溢出检测。
+
+优先队列对外提供 \code{push_or_decrease(key,v)}、\code{pop()}、
+\code{empty()} 和 \code{clear()}。支持减键的实现通过顶点索引定位元素，
+共享基类用时间戳区分本轮在堆中的顶点。
+\code{pop()} 后清除对应在堆标记，完整搜索结束时队列必须为空并可复用。
+
+\subsection{Dijkstra 的主循环与正确性}
+非负权重保证：取出的最小有效标签不会再被后来经过未处理顶点的路径改进。
+初始时源点距离为零；每次松弛只用已发现路径的长度更新标签，
+因而有限标签始终对应某条实际路径。结合最小有效标签的定型性质，
+归纳可得搜索结束后所有可达顶点距离正确。
+标准库版本可能含有旧键，故主循环统一执行过期条目检查。
+
+\begin{lstlisting}[caption={共享 Dijkstra 伪代码}]
+DIJKSTRA(G, s, Q):
+  fill d[0..n] with INF
+  d[s] = 0; Q.push_or_decrease(0, s)
+  while not Q.empty():
+    (key, u) = Q.pop()
+    if key > d[u]: continue
+    for each (v, w) in G[u]:
+      if d[u] + w < d[v]:
+        d[v] = d[u] + w
+        Q.push_or_decrease(d[v], v)
+  return d
+\end{lstlisting}
+
+\subsection{二叉堆、段树与 PBDS}
+\textbf{标准库优先队列。}最小堆保存 $(d,v)$。
+每次改进距离直接插入新条目，取出时丢弃旧条目。
+因此堆中可能同时有同一顶点的多个键，空间随成功松弛次数增长。
+
+\textbf{手写二叉堆。}数组 \code{heap[pos]} 保存顶点，
+\code{idx[v]} 保存位置，\code{key[v]} 保存当前键。
+插入把顶点放到末尾并上浮；减键从 \code{idx[v]} 上浮；
+取最小值把末尾移到根并下沉，每次交换同步更新两个顶点的位置。
+每个在堆顶点只有一个条目。
+
+\textbf{段树堆。}每个顶点对应一个叶子，内部结点保存子区间的最小键及其顶点。
+插入或减键沿根路径更新；取最小值读取根的顶点，再将相应叶子置为 $\infty$。
+更新过程中即使最小值不变，只要对应顶点改变也必须继续传播，
+以避免相等键导致过期顶点；最大编号顶点与哨兵叶子必须分开。
+
+\textbf{PBDS pairing 与 thin heap。}适配器保存每个顶点的
+\code{point_iterator}，首次入堆调用 \code{push}，随后用
+\code{modify} 更新条目。内部堆序维护交给 GNU 库。
+本项目没有重新实现两种库堆，也不把它们的减键摊还界简单等同于 Fibonacci 堆。
+
+\subsection{Fibonacci 堆}
+每个顶点在预先分配的节点数组中对应一个槽位。
+节点包含键、父亲、孩子、左右兄弟指针、度数和标记；
+根表与孩子表均采用循环双向链表，另存最小根指针。
+插入只将单节点树并入根表；取最小值时提升其孩子，
+再按度数合并同度树。实现通过摘下当前根再处理的方式遍历根表，
+避免一边合并一边依赖失效的循环终止点。
+
+\begin{lstlisting}[caption={Fibonacci 堆的关键操作}]
+INSERT(v, key):
+  initialize node[v] as a singleton unmarked root
+  splice node[v] into root list; update minimum
+EXTRACT_MIN():
+  remove minimum root z
+  promote all children of z to unmarked roots
+  while two roots have the same degree:
+    link the larger-key root under the smaller-key root
+  rebuild root list and minimum; return z
+DECREASE(v, key):
+  node[v].key = key
+  if v violates heap order with its parent:
+    cut v to the root list
+    mark its parent on the first child loss
+    repeatedly cut marked ancestors after another child loss
+  update minimum if needed
+\end{lstlisting}
+
+标记记录非根节点是否已失去一个孩子。势函数可取
+$\Phi=t+2q$，其中 $t$ 为根数，$q$ 为标记节点数；
+级联剪切造成的标记减少可支付剪切代价。
+Fibonacci 堆由此支持摊还 $O(1)$ 的插入和减键、摊还 $O(\log n)$ 的取最小值，
+得到 Dijkstra 的 $O(m+n\log n)$ 界\cite{fredman}。
+该界描述总操作序列，并不保证每一次取最小值都只需对数时间。
+
+\subsection{单调 radix heap}
+radix heap 保存上次取出的键 $L$。
+键 $k$ 放入编号 $b(k)=\operatorname{bitwidth}(k\mathbin{\mathrm{xor}}L)$ 的桶，
+其中桶零只含等于 $L$ 的键。若桶零为空，从最小非空桶找出最小键作为新 $L$，
+并按新 $L$ 重新分配该桶；重新分配后的桶编号会减小。
+减键使用记录了桶编号和桶内位置的句柄，跨桶移动时交换删除并修复被交换元素的句柄。
+
+\begin{lstlisting}[caption={Radix heap 的取最小值}]
+POP():
+  if bucket[0] is empty:
+    b = smallest nonempty bucket id
+    L = minimum key in bucket[b]
+    redistribute every entry in bucket[b] using bitwidth(key XOR L)
+  remove and return an entry from bucket[0]
+  if all buckets are empty: reset L = 0 for the next query
+\end{lstlisting}
+
+合法插入要求 $k\ge L$，而非要求所有插入键按全局顺序递增。
+Dijkstra 的非负边权保证新发现候选距离不小于当前取出的有效距离，符合这一约束。
+当前实现只有 32 个桶，桶内位置句柄占 25 位；
+它不是任意 64 位键范围上的通用 radix heap。
+本报告仅针对已通过交叉校验的输入，未来扩大距离或桶容量范围时需先修改实现并验证边界。
+
+\subsection{两种标签修正参照算法}
+\textbf{FIFO SPFA。}队列存 $(d,v)$ 条目；成功松弛后插入新条目，
+取出后跳过过期距离。它没有单独的在队标记，可能出现重复条目，
+因此内存和操作次数不应直接套用“一顶点一个队列项”的分析。
+
+\textbf{SLF+LLL SPFA。}双端队列只存顶点，并维护在队标记。
+成功松弛未在队的顶点时，若其标签小于队首则从前端插入（SLF），否则插到后端。
+处理队首前，若其标签大于在队顶点的平均标签，则移至队尾（LLL）。
+通过标签总和维护平均值，队内顶点标签减少时同步更新总和。
+两条启发规则只调整松弛顺序，不提供 Dijkstra 式的出队定型保证。
+
+\begin{lstlisting}[caption={SLF+LLL 的队列调度规则}]
+ENQUEUE(v):
+  if queue empty or d[v] < d[front]: push_front(v)
+  else: push_back(v)
+  in_queue[v] = true; sum += d[v]; count += 1
+PROCESS():
+  while d[front] * count > sum: rotate front to back
+  u = pop_front(); in_queue[u] = false
+  sum -= d[u]; count -= 1
+  relax outgoing arcs of u
+  update sum on an already queued label decrease
+  otherwise enqueue each newly improved vertex
+\end{lstlisting}
+\FloatBarrier

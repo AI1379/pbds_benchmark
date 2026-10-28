@@ -12,4 +12,6 @@ CMakeFiles/
 # Downloaded benchmark data (official DIMACS 9th-challenge USA road networks).
 # Restore it reproducibly with: pwsh pq-test/tools/fetch-dimacs.ps1
 # See docs/DATA.md for provenance, hashes and verification instructions.
-data/
+# Anchored to the project root: reports/data/ holds committed CSV snapshots
+# that the report is built from and must not be ignored.
+/data/

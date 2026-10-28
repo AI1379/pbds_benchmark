@@ -53,7 +53,43 @@ target_compile_definitions(dimacs-parser-test PRIVATE
 add_executable(heap-adaptor-test heap-adaptor-test.cpp)
 target_link_libraries(heap-adaptor-test PRIVATE gtest_main)
 
-foreach(_target dimacs-inspect dimacs-parser-test heap-adaptor-test)
+# ---------------------------------------------------------------------------
+# New-architecture Dijkstra benchmark (pq-test/dij-bench-v2.cpp)
+#
+# One CSR graph per argument is shared by every implementation. Heaps: std,
+# hand-written binary, segment tree, Fibonacci, radix, pb_ds pairing / thin
+# (GCC only), plus queue-based Bellman-Ford (SPFA). The program has its own
+# main() so that it can cross-check all implementations before timing anything;
+# therefore it links benchmark::benchmark instead of benchmark::benchmark_main.
+# ---------------------------------------------------------------------------
+add_executable(dij-bench-v2 dij-bench-v2.cpp)
+target_link_libraries(dij-bench-v2 PRIVATE benchmark::benchmark)
+
+# ---------------------------------------------------------------------------
+# DIMACS road-network benchmark (pq-test/dij-bench-dimacs.cpp)
+#
+# Loads a `.gr` graph and a `.p2p` / `.ss` query file at run time (the data is
+# not committed, see docs/DATA.md) and runs the same implementation set as
+# dij-bench-v2. DIMACS_DATA_DIR only supplies the default graph path; the
+# query file is auto-detected next to the graph.
+# ---------------------------------------------------------------------------
+add_executable(dij-bench-dimacs dij-bench-dimacs.cpp)
+target_link_libraries(dij-bench-dimacs PRIVATE benchmark::benchmark)
+target_compile_definitions(dij-bench-dimacs PRIVATE
+  DIMACS_DATA_DIR="${PROJECT_SOURCE_DIR}/data/dimacs")
+
+# ---------------------------------------------------------------------------
+# Complexity-fitting benchmark (pq-test/dij-bench-complexity.cpp)
+#
+# Fixed-density synthetic families (sparse: m = 4n; dense: m = n(n-1)/4) so
+# Google Benchmark's ->Complexity(benchmark::oAuto) fit is meaningful. Same
+# implementations and SLF+LLL cross-check as dij-bench-v2.
+# ---------------------------------------------------------------------------
+add_executable(dij-bench-complexity dij-bench-complexity.cpp)
+target_link_libraries(dij-bench-complexity PRIVATE benchmark::benchmark)
+
+foreach(_target dimacs-inspect dimacs-parser-test heap-adaptor-test dij-bench-v2
+                 dij-bench-dimacs dij-bench-complexity)
   if(MSVC)
     target_compile_options(${_target} PRIVATE /W4 /utf-8)
   else()

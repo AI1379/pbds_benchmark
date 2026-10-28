@@ -5,9 +5,11 @@
 //   * Common contract of every heap adaptor: empty / push_or_decrease / pop /
 //     clear
 //   * Randomized differential test against std::multiset (tied keys, lazy
-//     deletion semantics, clear-then-reuse)
-//   * End-to-end Dijkstra: differential test against Bellman-Ford on the same
-//     random graph
+//     deletion semantics, clear-then-reuse). RadixHeap is skipped there: it
+//     requires monotone insertion (see the comment above
+//     CheckModelDifferential), which the arbitrary-key model violates.
+//   * End-to-end Dijkstra: differential test against the SLF+LLL SPFA from
+//     general-bellman-ford.hpp on the same random graph
 //   * SegmentTreeHeap regressions: 1-based vertices, the sentinel leaf for
 //     v == n, the stale min_vertex_ bug with tied keys, decrease semantics
 //   * Contract assertions (Debug builds only): invalid vertex, pop on an empty
@@ -19,15 +21,19 @@
 // `Debug` build.
 //
 
+#include "binary-heap.hpp"
 #include "csr-graph.hpp"
 #include "fibonacci-heap.hpp"
+#include "general-bellman-ford.hpp"
 #include "heap-adaptor.hpp"
+#include "radix-heap.hpp"
+#include "random-graph.hpp"
 #include "segment-tree-heap.hpp"
 
 #include <gtest/gtest.h>
 
-#include <algorithm>
 #include <cstdint>
+#include <deque>
 #include <limits>
 #include <random>
 #include <set>
@@ -47,52 +53,9 @@ constexpr Key kInf = std::numeric_limits<Key>::max() / 4;
 // ---------------------------------------------------------------------------
 // Reference implementations
 // ---------------------------------------------------------------------------
-
-/// Builds a random directed graph on n vertices (1-based). Weights are in
-/// 0..2, which makes tied shortest distances likely.
-db::Graph MakeRandomGraph(std::mt19937 &rng, Vertex n) {
-  std::vector<std::vector<db::Graph::Edge>> adj(n + 1);
-  const unsigned m = n + static_cast<unsigned>(rng() % (2 * n + 1));
-  for (unsigned i = 0; i < m; ++i) {
-    const Vertex u = static_cast<Vertex>(1 + rng() % n);
-    const Vertex v = static_cast<Vertex>(1 + rng() % n);
-    const Key w = static_cast<Key>(rng() % 3);
-    adj[u].push_back({v, w});
-  }
-  std::vector<uint32_t> offset(n + 1, 0);
-  std::vector<db::Graph::Edge> edges;
-  for (Vertex u = 1; u <= n; ++u) {
-    for (const auto &e : adj[u])
-      edges.push_back(e);
-    offset[u] = static_cast<uint32_t>(edges.size());
-  }
-  return db::Graph(std::move(offset), std::move(edges));
-}
-
-/// Bellman-Ford (non-negative weights, no negative cycles) as an independent
-/// reference that does not use any heap.
-std::vector<Key> BellmanFord(const db::Graph &graph, Vertex source) {
-  const Vertex n = graph.num_vertices();
-  std::vector<Key> dis(static_cast<size_t>(n) + 1, kInf);
-  dis[source] = 0;
-  for (Vertex iter = 1; iter < n; ++iter) {
-    bool changed = false;
-    for (Vertex u = 1; u <= n; ++u) {
-      if (dis[u] == kInf)
-        continue;
-      for (const db::Graph::Edge &e : graph[u]) {
-        const Key nd = dis[u] + e.w;
-        if (nd < dis[e.v]) {
-          dis[e.v] = nd;
-          changed = true;
-        }
-      }
-    }
-    if (!changed)
-      break;
-  }
-  return dis;
-}
+// The random graphs come from the shared generator in random-graph.hpp, the
+// same one the benchmark programs use, so the tests and the benchmarks see the
+// same graph shape (weights 0..2 here, which makes ties likely).
 
 /// Generic Dijkstra kernel (same skeleton as section 6.4 of
 /// docs/fibonacci-heap.md).
@@ -132,6 +95,16 @@ std::vector<Key> RunDijkstra(const db::Graph &graph, Vertex source,
 // Every pop must return a key equal to the reference minimum and the pair
 // (key, vertex) must exist in the model. A decreaseable heap must additionally
 // never pop the same vertex twice and never pop a stale key.
+//
+// This model does not apply to heaps with a monotone-insertion requirement,
+// i.e. Heap::requires_monotone_pushes (RadixHeap): its keys are only valid if
+// every push is >= the last popped key, while the model deliberately pushes
+// arbitrary keys (a fresh random key in 0..key_mod-1, then strict decreases).
+// Run against a radix heap this aborts on the insert_impl assert in Debug and
+// silently produces a wrong pop order in Release, so the two ModelDifferential
+// tests below GTEST_SKIP such heaps. RadixHeap is still covered by the other
+// typed tests (in particular DijkstraMatchesBellmanFord, where non-negative
+// edge weights make every push monotone).
 // ---------------------------------------------------------------------------
 template <typename Heap>
 void CheckModelDifferential(Vertex n, int trials, int steps, unsigned key_mod,
@@ -255,7 +228,8 @@ using HeapTypes = ::testing::Types<
     db::PbdsPairingHeapAdaptor, db::PbdsThinHeapAdaptor,
     db::PbdsBinomialHeapAdaptor, db::PbdsRcBinomialHeapAdaptor,
 #endif
-    db::SegmentTreeHeap, db::StdHeapAdaptor, db::FibonacciHeap>;
+    db::SegmentTreeHeap, db::StdHeapAdaptor, db::FibonacciHeap,
+    db::BinaryHeapAdaptor, db::RadixHeap>;
 
 TYPED_TEST_SUITE(HeapAdaptorTest, HeapTypes);
 
@@ -371,23 +345,40 @@ TYPED_TEST(HeapAdaptorTest, DecreaseUpdatesKeyWithoutDuplicates) {
 }
 
 TYPED_TEST(HeapAdaptorTest, ModelDifferentialSmall) {
-  CheckModelDifferential<TypeParam>(32, 8, 3000, 64, 12345u);
+  if constexpr (TypeParam::requires_monotone_pushes) {
+    GTEST_SKIP() << "a radix heap requires monotonically nondecreasing push "
+                    "keys; the model feeds arbitrary keys";
+  } else {
+    CheckModelDifferential<TypeParam>(32, 8, 3000, 64, 12345u);
+  }
 }
 
 TYPED_TEST(HeapAdaptorTest, ModelDifferentialLarge) {
-  CheckModelDifferential<TypeParam>(1000, 1, 50000, 4096, 987654u);
+  if constexpr (TypeParam::requires_monotone_pushes) {
+    GTEST_SKIP() << "a radix heap requires monotonically nondecreasing push "
+                    "keys; the model feeds arbitrary keys";
+  } else {
+    CheckModelDifferential<TypeParam>(1000, 1, 50000, 4096, 987654u);
+  }
 }
 
 TYPED_TEST(HeapAdaptorTest, DijkstraMatchesBellmanFord) {
   std::mt19937 rng(20261026u);
+  // The deque is reused across queries, just like the heap below.
+  std::deque<uint32_t> queue;
   const Vertex sizes[] = {1, 2, 3, 5, 10, 30};
   for (Vertex n : sizes) {
     TypeParam heap(n);
+    std::vector<Key> want(static_cast<size_t>(n) + 1);
     for (int trial = 0; trial < 4; ++trial) {
-      const db::Graph graph = MakeRandomGraph(rng, n);
+      // Weights 0..2: only three distinct values, so tied shortest distances
+      // (the interesting case for the heaps) are likely. Density n..3n arcs,
+      // like the generator this test used to carry locally.
+      const db::Graph graph = db::MakeRandomGraph(
+          n, static_cast<uint32_t>(n + rng() % (2 * n + 1)), 2, rng());
       for (int query = 0; query < 2; ++query) {
         const Vertex source = static_cast<Vertex>(1 + rng() % n);
-        const std::vector<Key> want = BellmanFord(graph, source);
+        db::spfa_slf_lll(graph, source, want, queue);
         const std::vector<Key> got = RunDijkstra(graph, source, heap);
         ASSERT_EQ(got.size(), want.size());
         for (Vertex v = 1; v <= n; ++v)

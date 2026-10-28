@@ -1,0 +1,22 @@
+% !TeX program = xelatex
+\documentclass[UTF8,11pt,a4paper,fontset=fandol]{ctexart}
+\input{preamble}
+\input{report-config}
+\begin{document}
+\input{sections/00-front}
+\tableofcontents
+\clearpage
+\input{sections/01-introduction}
+\clearpage
+\input{sections/02-algorithms}
+\clearpage
+\input{sections/03-testing}
+\clearpage
+\input{sections/04-analysis}
+\clearpage
+\appendix
+\ctexset{section/name={附录,},section/number=\Alph{section}}
+\input{sections/05-source}
+\input{sections/06-references}
+\input{sections/07-authorship}
+\end{document}

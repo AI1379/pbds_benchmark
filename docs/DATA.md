@@ -4,8 +4,7 @@
 Paths** USA 公路网数据的来源、获取方式、校验值、格式说明、可复现步骤，以及
 `.ss` / `.p2p` 查询文件的调查结论。
 
-- 采集日期：**2026-10-26**（Asia/Shanghai）
-- 采集人：`data-hunter`（Team task `task-1`）
+- 采集日期：**2026-10-26**（P0/P1/P2 六文件，`data-hunter`）；**2026-10-28**（补齐完整 48 文件集，`lead`）
 - 数据根目录：`data/dimacs/`（已加入 `proj2/.gitignore`，**不提交**；用脚本可完整重建）
 - 官方站点：<http://www.diag.uniroma1.it/challenge9/> —— **已下线**（HTTP 502 / TLS 握手失败，
   2026-10-26 实测），因此全部数据来自 Internet Archive Wayback Machine 归档与 GitHub 镜像。
@@ -23,16 +22,18 @@ Paths** USA 公路网数据的来源、获取方式、校验值、格式说明�
 | `USA-road-t` | 边权 = 通行**时间** | `USA-road-t.<REGION>.gr.gz` |
 | 坐标 | 节点经/纬度 | `USA-road-d.<REGION>.co.gz` |
 
-`<REGION>` 取值：`NY BAY COL FLA NE NW CAL LKS E W CTR USA`。本项目按需下载了
+`<REGION>` 取值：`NY BAY COL FLA NE NW CAL LKS E W CTR USA`。2026-10-26 首轮按需下载了
 **NY、BAY、NE、E** 四个距离图 + NY 的坐标 + NY 的通行时间图，构成从小到大的基准阶梯
-（26 万 → 360 万节点）。实测体量（2026-10-26）：
+（26 万 → 360 万节点）；**2026-10-28 已补齐为全部 12 个区域 × d/t 两个家族 × .gr/.co 的
+48 个文件，完整清单、来源与校验见 §9**。首轮六文件实测体量（2026-10-26）：
 
 - 总下载量（`raw/` 原始 `.gz`）：**87,090,938 B（≈87.1 MB / 83.1 MiB）**
 - 解压后纯文本：**327,603,114 B（≈327.6 MB / 312.4 MiB）**，其中
   E 193.0 MB、NE 82.2 MB、BAY 15.9 MB、NY.gr 14.4 MB、NY.co 7.3 MB、NY-t 14.8 MB（十进制）；
   五个 `.gr` 合计约 305 MiB（不含 NY.co 的 7.0 MiB）
-- `data/dimacs/` 全部内容：**415,548,506 B（≈415.5 MB / 396.3 MiB）**
-  （含 `raw/`、`samples/`、`queries/`、`reference/`、`verification/` 与 `MANIFEST.sha256`）
+- `data/dimacs/` 数据文件本体（完整 48 文件）：**12,640,688,380 B（≈12.64 GB / 11.77 GiB）**
+  （原始 `.gz` 2,784,113,022 B + 解压明文 9,856,575,358 B；另含 `samples/`、`queries/`、
+  `reference/`、`verification/` 与 `MANIFEST.sha256` 约 0.85 MB）
 
 
 数据体量（本次实测，均经三重校验，见 §4）：
@@ -483,52 +484,87 @@ data/dimacs/
 
 ---
 
-## 9. 未下载的可选数据（Wayback 可获取，本次超预算未取）
+## 9. 完整数据集（2026-10-28 追加）：全部 48 个 USA 路网文件
 
-本次总下载量控制在 ~87 MB。以下文件在 Wayback 有归档（CDX 2026-10-26 查询），
-如后续需要更大规模基准可扩展 `fetch-dimacs.ps1` 的内嵌表后下载
-（`length` 为 CDX 的 WARC 记录长度，实际 payload 会略小，±数 KB 级；下载后必须校验 n/m）：
+2026-10-28 在原有 P0/P1/P2 六个文件基础上，补齐了挑战赛官方提供的**完整 USA 路网数据集**：
+12 个区域 × {距离 `d` / 通行时间 `t`} × {图 `.gr` / 坐标 `.co`} = **48 个文件**，原始 `.gz` 与解压
+明文全部落盘。官方站点仍下线，数据全部取自 Internet Archive Wayback Machine（旧域名
+`dis.uniroma1.it/~challenge9` 的 2011/2012 归档 + 新域名 2023 归档），逐文件在
+`fetch-dimacs.ps1` 内嵌表中记录来源时间戳、字节数与 SHA-256。
 
-`data/USA-road-d/` 中还归档了（本次未下载）：
+### 9.1 区域与规模（官方节点/弧数；`d` 与 `t` 为同一张路网的两种权重）
 
-| 文件 | Wayback 时间戳 | CDX 记录长度 |
-| --- | --- | ---: |
-| `USA-road-d.NW.gr.gz` | 20230413130317 | 15,908,461 |
-| `USA-road-d.CAL.gr.gz` | 20240122162928 | 26,977,210 |
-| `USA-road-d.W.gr.gz` | 20230413134531 | 90,484,393 |
-| `USA-road-d.USA.gr.gz` | 20230413132821 | 350,415,549 |
-| `USA-road-d.CAL.co.gz` | 20240122164051 | 17,196,475 |
-| `USA-road-d.FLA.co.gz` | 20240122162832 | 9,061,058 |
-| `USA-road-d.NE.co.gz` | 20240122163335 | 13,296,389 |
-| `USA-road-d.NW.co.gz` | 20240122163939 | 11,294,339 |
-| `USA-road-d.CTR.co.gz` | 20240123141641 | 145,485,056 |
-| `USA-road-d.W.co.gz` | 20240122162817 | 60,275,907 |
+| 区域 | 名称 | 节点 n | 弧 m |
+| --- | --- | ---: | ---: |
+| USA | Full USA | 23,947,347 | 58,333,344 |
+| CTR | Central USA | 14,081,816 | 34,292,496 |
+| W | Western USA | 6,262,104 | 15,248,146 |
+| E | Eastern USA | 3,598,623 | 8,778,114 |
+| LKS | Great Lakes | 2,758,119 | 6,885,658 |
+| CAL | California and Nevada | 1,890,815 | 4,657,742 |
+| NE | Northeast USA | 1,524,453 | 3,897,636 |
+| NW | Northwest USA | 1,207,945 | 2,840,208 |
+| FLA | Florida | 1,070,376 | 2,712,798 |
+| COL | Colorado | 435,666 | 1,057,066 |
+| BAY | San Francisco Bay Area | 321,270 | 800,172 |
+| NY | New York City | 264,346 | 733,846 |
 
-`data/USA-road-t/` 中还归档了（本次未下载）：
+### 9.2 体量（2026-10-28 实测）
 
-| 文件 | Wayback 时间戳 | CDX 记录长度 |
-| --- | --- | ---: |
-| `USA-road-t.BAY.gr.gz` | 20240122164126 | 4,238,666 |
-| `USA-road-t.COL.gr.gz` | 20240123142026 | 5,901,266 |
-| `USA-road-t.NE.gr.gz` | 20240122163738 | 22,259,223 |
-| `USA-road-t.NW.gr.gz` | 20240123141251 | 16,337,933 |
-| `USA-road-t.CAL.gr.gz` | 20240123141838 | 27,548,129 |
-| `USA-road-t.LKS.gr.gz` | 20240123142034 | 41,092,486 |
+- 原始 `.gz`（`raw/`）：**2,784,113,022 B（2.59 GiB）** —— 24 个 `.gr.gz` + 24 个 `.co.gz`
+- 解压明文（`data/dimacs/` 根）：**9,856,575,358 B（9.18 GiB）**
+- 两项合计：**12,640,688,380 B（≈12.64 GB / 11.77 GiB）**；另加 `samples/`、`queries/`、
+  `reference/`、`verification/` 与 `MANIFEST.sha256` 约 0.85 MB
+- 最大的两张明文图：`USA-road-d.USA.gr` **1,387,075,114 B（1.29 GiB）**、
+  `USA-road-t.USA.gr` **1,409,628,748 B（1.31 GiB）**
 
-**Wayback 未归档（本次 CDX 未发现，无法通过现有镜像获取）**：
-`USA-road-d.COL.*`、`USA-road-d.FLA.gr`、`USA-road-d.LKS.*`、`USA-road-d.NY.co`、
-`USA-road-d.BAY.co`、`USA-road-d.E.co`、`USA-road-d.USA.co`、`USA-road-t.E/W/USA/CTR/FLA` 等。
-（`USA-road-t.NY.gr.gz` 已下载，见 P2。）
+### 9.3 来源与关键发现
 
-官方原始 URL 模式（若站点恢复可直接使用）：
+| 文件组 | 来源 | Wayback 时间戳 |
+| --- | --- | --- |
+| 原 P0/P1/P2 六文件 | 见 §2.3（新域名归档 + GitHub 镜像） | 2023/2024 |
+| 新增 40 个文件（12 区域 d 家族 + t 家族，除下面两个 USA 图） | 旧域名 `dis.uniroma1.it/~challenge9` 官方归档 | 2011-06-06 / 2011-06-07，逐文件见脚本内嵌表 |
+| `USA-road-d.USA.gr.gz` | 新域名 `diag.uniroma1.it` 归档 | `20230413132821` |
+| `USA-road-t.USA.gr.gz` | 旧域名归档 | `20120206064312` |
 
+**与 2026-10-26 结论的差异（重要更正）**：旧版 §9 曾判断 `USA-road-d.USA.co.gz`、`USA-road-t.*`
+等“Wayback 未归档、无法获取”。实际原因是当时只查询了新域名 CDX；**旧域名
+`dis.uniroma1.it/~challenge9` 的 2011 归档包含完整 48 个文件**（含 `t.*` 的全部 `.co`）。
+本次据此补齐。唯一例外：2011-06-06 的 `t.USA.gr.gz` 归档是**截断**的（只存了
+320,594,536 B，解压到 320.6 MB 处 gzip CRC 必然失败），已改用 2012-02-06 的完整归档
+（payload 358,091,759 B）。
+
+补充说明：官方说明 `.co` 坐标文件对 `d`/`t` 两个家族相同（同一条路网、同一批节点）。实测 `d.X.co`
+与 `t.X.co` 的**坐标数据行完全相同**，仅第 3 行注释不同
+（`c TIGER/Line nodes coords for graph USA-road-d.X` / `...-t.X`）；`.gz` 压缩后大小多数相等
+（LKS / W 相差 1 B），但 SHA-256 不同。两份都保留，便于按官方文件清单逐一对号。
+
+### 9.4 校验结果（2026-10-28，48/48 全部通过）
+
+对 48 个文件逐一执行：
+
+1. gzip 完整解压到 EOF（CRC 校验通过）；
+2. `.gr`：`p sp <n> <m>` 与 §9.1 官方表一致，`a` 行数**精确等于** m（USA 图：58,333,344）；
+3. `.co`：`p aux sp co <n>` 与官方 n 一致，`v` 行数等于 n；
+4. 原始 `.gz` + 解压明文的 SHA-256 写入 `MANIFEST.sha256`。
+
+逐文件 JSON 报告（n/m、行数、字节数、SHA-256）保存在 `data/dimacs/verification/full-set-report.jsonl`（不提交）。
+
+`MANIFEST.sha256` 现在共 **114 条**（48×2 数据文件 + 9 个官方 sample + 9 个生成的 query），
+可 `cd data/dimacs && sha256sum -c MANIFEST.sha256` 复核。
+
+### 9.5 使用
+
+```powershell
+# 拉取/校验全部 48 个文件（约 2.7 GB 下载；已存在且校验通过时自动跳过）
+pwsh pq-test/tools/fetch-dimacs.ps1 -Set Full
+
+# 用 C++ 解析器直接读取全美图
+.\build\pq-test\dimacs-inspect.exe data\dimacs\USA-road-d.USA.gr
 ```
-http://www.diag.uniroma1.it/challenge9/data/USA-road-d/USA-road-d.<REGION>.gr.gz
-http://www.diag.uniroma1.it/challenge9/data/USA-road-d/USA-road-d.<REGION>.co.gz
-http://www.diag.uniroma1.it/challenge9/data/USA-road-t/USA-road-t.<REGION>.gr.gz
-```
 
----
+`fetch-dimacs.ps1` 的 `-Set Full` 为本轮新增；默认 `-Set All` 仍是原来的 6 个 P0/P1/P2 文件，
+行为不变。新增的 42 条目录项在脚本中标记为 `Priority = 'F'`，每题都带来源 URL、字节数与 SHA-256。
 
 ## 10. 参考链接
 
@@ -549,3 +585,7 @@ http://www.diag.uniroma1.it/challenge9/data/USA-road-t/USA-road-t.<REGION>.gr.gz
 | 日期 | 变更 |
 | --- | --- |
 | 2026-10-26 | 首次采集：NY/BAY/NE/E d 图 + NY co + NY t 图；官方示例文件；ch9-1.1 基准包与格式文档；生成 1000 对 p2p 查询；建立 MANIFEST、fetch/verify/gen 脚本；完成 `.ss`/`.p2p` 可用性调查 |
+| 2026-10-28 | 补齐完整数据集：12 区域 × d/t × {.gr,.co} = 48 个文件（旧域名 2011/2012 Wayback 归档 + d.USA 2023 归档）；48/48 通过 gzip CRC、n/m 与行数校验；`fetch-dimacs.ps1` 新增 `-Set Full`（42 条新目录项）；MANIFEST 扩至 114 条 |
+
+
+

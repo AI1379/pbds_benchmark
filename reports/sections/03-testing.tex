@@ -1,0 +1,102 @@
+\section{测试结果}
+\label{sec:testing}
+\subsection{环境与计时口径}
+\begin{table}[H]\centering\small
+\caption{本轮实验环境与配置}\label{tab:environment}
+\begin{tabularx}{\linewidth}{lX}\toprule
+项目 & 配置\\\midrule
+平台 & 同一台 Intel Core i9-14900HX；WSL2 Arch Linux，32 个逻辑 CPU\\
+工具链 & GCC 16.2.1；CMake 4.4.3；Ninja 1.13.2；Google Benchmark 1.9.5\\
+编译 & C++20，Release，\code{-O3 -DNDEBUG}\\
+输入与执行 & 二进制与图数据位于 WSL ext4；输入复制后用 SHA-256 核对\\
+运行策略 & benchmark 串行执行；随机图和复杂度各三轮；路网每实现一个完整批次\\
+计时 & 自动迭代最短目标 0.5 s；路网每次迭代固定包含 1000 查询\\
+正确性 & 每个 benchmark 计时前执行跨实现距离数组校验\\\bottomrule
+\end{tabularx}\end{table}
+
+图生成、文本解析、优先队列构造与距离数组初次分配位于计时循环外；
+每次搜索对距离数组的重新初始化仍在计时范围内。
+SLF+LLL 的局部在队标记数组分配在其搜索函数中，包含在计时中。
+随机图与复杂度曲线使用每次调用的 CPU 时间，误差棒为三轮结果的\textbf{样本标准差}，
+不是置信区间，也不是 1000 查询的离散程度。
+路网表使用搜索循环中墙钟时间除以查询数；原始 CSV 同时保留整批 CPU 与墙钟数据。
+
+\subsection{正确性用例表}
+本轮 CTest 注册 126 项：124 项通过，2 项因不满足 radix 单调插入前提而按设计跳过，
+没有失败。Release 构建关闭了依赖断言的 Debug death tests，不能将本轮结果解释为
+这部分测试也已经执行。测试记录保留于运行证据中。
+
+\begin{table}[H]\centering\small
+\caption{测试目的、预期与实际行为}\label{tab:cases}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.7cm}XXXl}\toprule
+用例类别 & 目的与预期 & 实际结果 & 异常解释 & 状态\\\midrule
+DIMACS 解析 & 合法输入可解析，坏计数、越界应拒绝 & 31 项通过 & 无 & 通过\\
+堆接口与差分 & 插入、减键和复用符合模型 & 适用用例通过 & 无 & 通过\\
+Radix 任意键模型 & 任意键序列违背单调前提 & 两项主动跳过 & 模型不适用 & 跳过\\
+Dijkstra 差分 & 完整距离等于参照 & 所有类型通过 & 无 & 通过\\
+段树回归 & 边界叶子与相等键更新正确 & 五项通过 & 无 & 通过\\
+随机图启动检查 & 多种种子、源点结果一致 & 校验通过 & 无 & 通过\\
+NY/BAY 启动检查 & 前三查询完整距离一致 & 两图均通过 & 仅覆盖前三条 & 通过\\\bottomrule
+\end{tabularx}\end{table}
+
+堆单元测试还覆盖 PBDS binomial 和 rc-binomial 类型；它们不在本次七种 Dijkstra
+性能实现集合中。路网启动检查的参照为 SLF+LLL，校验对象为七种堆。
+这与对全部实现、全部查询各自使用独立第三方程序验证有区别。
+
+\clearpage
+\subsection{USA 路网输入与结果}
+NY 图有 $n=264346$、$m=733846$，BAY 图有 $n=321270$、$m=800172$；
+两图均使用完整的 1000 对查询。每个实现运行一次完整批次，搜索总计 $9\times2\times1000$
+次。图规模与输入 SHA-256 保留在 \code{data/provenance.json}；
+按课程要求，报告目录不附带大型路网原始图文件，只列数据来源链接\cite{dimacs}。
+
+\begin{table}[H]\centering\small
+\caption{平均每查询墙钟耗时；加速比为标准库耗时除以当前实现耗时}\label{tab:dimacs}
+\input{tables/dimacs}
+\end{table}
+\plotfigure{dimacs-runtime}{NY 与 BAY 的平均查询耗时。横轴为对数；每项均为一个完整 1000 查询批次，未估计重复运行方差。}{fig:roadtime}
+NY/BAY 中 radix 相对标准库的加速比分别约为 1.57、1.48，
+SLF+LLL 为 2.73、2.22；Fibonacci 的耗时则为标准库的 2.26、2.49 倍。
+FIFO SPFA 分别需要 249.409、353.306 ms/查询，明显更慢。
+结论仅针对本轮输入，不能推出 FIFO 在所有图上都慢，或 SLF+LLL 总有优势。
+\FloatBarrier
+
+\clearpage
+\subsection{随机图参数扫描}
+随机有向图共有 19 组 $(n,m)$、每组九种实现，合计 171 个配置。
+允许重边，排除自环，权重范围为 $[0,200000]$，源点为 1，图不保证连通。
+同一 C++ 生成器的可达性诊断确认：$n=163840$ 的两组图
+（$m=163839,327678$）及 $n=10,m=9$ 都仅源点自身可达，可达弧数为零。
+这些结果主要反映初始化与调用开销，不能代表遍历全图的代价。
+诊断保留在 \code{data/random-reachability.csv}，原始计时保持不变。
+
+\begin{table}[H]\centering\small
+\caption{三组随机图的平均 CPU 时间，单位 ms；对应弧数依次为 327552、327672、327676}\label{tab:random}
+\input{tables/random}
+\end{table}
+\plotfigure{random-fixed-n}{随机图全部参数，按固定顶点数分面，只在同一面板内改变弧数。误差棒为三轮样本标准差，纵轴为对数；孤立源点已在面板标题标注。}{fig:random}
+\FloatBarrier
+
+\clearpage
+\subsection{固定密度实验与拟合}
+固定密度实验使用两族图：稀疏族 $m=4n$，$n=2^{10},\ldots,2^{17}$；
+稠密族 $m=n(n-1)/4$，$n=2^7,\ldots,2^{12}$。
+每族每个规模都测量九种实现，合计 $9(8+6)=126$ 组。
+\plotfigure{complexity-sparse}{稀疏族的平均 CPU 时间，$m=4n$。误差棒表示三轮样本标准差。}{fig:sparse}
+\plotfigure{complexity-dense}{稠密族的平均 CPU 时间，$m=n(n-1)/4$。误差棒表示三轮样本标准差。}{fig:dense}
+
+Google Benchmark 分别固定 $f(n)=n\log_2n$ 和 $f(n)=n^2$，
+用过原点的最小二乘形式 $T(n)\approx c f(n)$ 拟合。
+表\ref{tab:fits} 的稀疏系数单位为 ns/$(n\log_2n)$，
+稠密系数为 ns/$n^2$，两列系数不能直接互相比较大小。
+RMS 为库定义的归一化残差百分比，衡量有限范围内模型贴合程度。
+
+\begin{table}[H]\centering\small
+\caption{固定模型的 CPU 系数与 RMS；所有值由 CSV 自动导出}\label{tab:fits}
+\input{tables/fits}
+\end{table}
+把相同模型套到 SPFA 只是一种经验参照，不代表证明了其渐近界。
+稠密图下 Fibonacci 的理论项为 $m+n\log n=\Theta(n^2)$；
+比较堆 Dijkstra 的常规上界含有 $m\log n$，
+但有限规模内扫描边的代价也可能主导计时，不能仅凭 $n^2$ 拟合好就证明去掉了对数因子。
+\FloatBarrier

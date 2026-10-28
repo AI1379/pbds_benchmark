@@ -34,6 +34,11 @@ template <typename Derived, bool Decreaseable = false> struct BaseHeapAdaptor {
   using Vertex = HeapVertex;
   using Entry = HeapEntry;
   static constexpr bool decreaseable = Decreaseable;
+  // Radix-heap style constraint: every push must use a key >= the last popped
+  // key. General-purpose adaptors have no such restriction, so this is false
+  // here and RadixHeap overrides it with true. Tests that push arbitrary keys
+  // (the std::multiset model differential test) must skip such a heap.
+  static constexpr bool requires_monotone_pushes = false;
 
   explicit BaseHeapAdaptor(Vertex n = 0) : epoch_(1) {
     if constexpr (Decreaseable) {

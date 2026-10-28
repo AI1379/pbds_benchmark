@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "pages": 19,
+  "figure_pairs": 6,
+  "generated_tables": 3,
+  "snapshot_integrity": "passed",
+  "pdf_author": "empty",
+  "latex_layout_warnings": [],
+  "visual_review": "all pages inspected; no clipping or overlap",
+  "pending_content": [
+    "actual author contributions",
+    "declaration and signatures",
+    "whole-submission source comment ratio"
+  ]
+}
